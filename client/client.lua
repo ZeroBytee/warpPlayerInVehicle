@@ -28,8 +28,8 @@ Vehicle getClosestVehicleFromPedPos(Ped ped, int maxDistance, int maxHeight, boo
     return veh;
 }
 
-RegisterServerEvent('fixVehicle')
-AddEventHandler('fixVehicle', function(vehNetId)
+RegisterNetEvent('qb-vab:fixVehicle')
+AddEventHandler('qb-vab:fixVehicle', function(vehNetId)
     local vehicle = NetworkGetEntityFromNetworkId(vehNetId)
 
     if DoesEntityExist(vehicle) and IsEntityAVehicle(vehicle) then
@@ -50,7 +50,7 @@ RegisterCommand('repairveh', function()
     --get the network ID of the vehicle && triggers the event if network ID is found
     local vehicleNetId = NetworkGetNetworkIdFromEntity(veh)
     if(vehicleNetId) {
-         TriggerServerEvent('fixVehicle', vehicleNetId)
+         TriggerServerEvent('qb-vab:fixVehicle', vehicleNetId)
     } else {
         TriggerEvent('chat:addMessage', {
             color = { 255, 0, 0},
