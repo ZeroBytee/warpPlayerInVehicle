@@ -1,1 +1,3 @@
--- config, if needed
+Config.vabJobs = { -- vab jobs
+    'mechanic',
+}
