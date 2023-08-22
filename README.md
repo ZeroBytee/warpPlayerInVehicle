@@ -4,5 +4,4 @@
 2) Put the folder in the *[Standalone]* folder, and restart the server
 
 **USAGE**
-the command to repair the vehicle is **/repairveh**
-\n**This command only works if you are in duty, and have the mechanic role!**
+the command to repair the vehicle is **/repairveh** (*This command only works if you are in duty, and have the mechanic role!*)
