@@ -1,32 +1,29 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
--- function to get closest vehicle
-Vehicle getClosestVehicleFromPedPos(Ped ped, int maxDistance, int maxHeight, bool canReturnVehicleInside){
-    Vehicle veh = NULL;
-    float smallestDistance = (float)maxDistance;
-    const int ARR_SIZE = 1024;
-    Vehicle vehs[ARR_SIZE];
-    int count = worldGetAllVehicles(vehs, ARR_SIZE);
- 
-    if (vehs != NULL)
-    {
-        for (int i = 0; i < count; i++)
-        {
-            if (doesEntityExistsAndIsNotNull(vehs[i]) && (canReturnVehicleInside || PED::IS_PED_IN_VEHICLE(ped, vehs[i], false) == false))
-            {
-                float distance = getDistanceBetweenEntities(ped, vehs[i]);
-                float height = getDistanceToGround(vehs[i]);
-                if (distance <= smallestDistance && height <= maxHeight && height >= 0 && isVehicleDrivable(vehs[i]))
-                {
-                    smallestDistance = distance;
-                    veh = vehs[i];
-                }
-            }
-        }
-    }
- 
-    return veh;
-}
+--returns the closest vehicle from the ped
+function getClosestVehicleFromPedPos(ped, maxDistance, maxHeight)
+    local veh = nil
+    local smallestDistance = maxDistance
+    local vehs = {}
+    local count = #vehs
+    count = GetGamePool("CVehicle") - 1
+    local playerCoords = GetEntityCoords(ped)
+
+    for i = 0, count do
+        local vehicle = GetIndexedPoolItem(i)
+        if DoesEntityExist(vehicle) then
+            local distance = #(playerCoords - GetEntityCoords(vehicle))
+            local height = GetEntityHeightAboveGround(vehicle)
+            
+            if distance <= smallestDistance and height <= maxHeight and height >= 0 and not IsPedInVehicle(ped, vehicle, false) then
+                smallestDistance = distance
+                veh = vehicle
+            end
+        end
+    end
+
+    return veh
+end
 
 RegisterNetEvent('qb-vab:fixVehicle')
 AddEventHandler('qb-vab:fixVehicle', function(vehNetId)
@@ -45,18 +42,17 @@ end)
 --Register the command
 RegisterCommand('repairveh', function()
     --get the vehicle entity
-    Vehicle veh = getClosestVehicleFromPedPos(GET_PLAYER_PED(PlayerPedId(), 5, 5, false))
+    local veh = getClosestVehicleFromPedPos(GetPlayerPed(PlayerPedId()), 5, 5)
 
     --get the network ID of the vehicle && triggers the event if network ID is found
     local vehicleNetId = NetworkGetNetworkIdFromEntity(veh)
-    if(vehicleNetId) {
+    if vehicleNetId then
          TriggerServerEvent('qb-vab:fixVehicle', vehicleNetId)
-    } else {
+    else
         TriggerEvent('chat:addMessage', {
             color = { 255, 0, 0},
             multiline = true,
             args = {"Me", "Could'n find a vehicle!"}
         })
-    }
-    
+        
 end)
