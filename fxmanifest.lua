@@ -1,5 +1,6 @@
 fx_version 'cerulean'
 game 'gta5'
+lua54 'yes'
 
 author 'GalaxicDev aka John Atlas>'
 description 'just simple repair script for AstroRP'
