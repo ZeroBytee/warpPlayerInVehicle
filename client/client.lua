@@ -21,17 +21,10 @@ local QBCore = exports['qb-core']:GetCoreObject()
     return veh
 end
 
-RegisterCommand('onduty', function()
-    local player = QBCore.Functions.GetPlayerData()
 
-    print("debug1")
-    QBCore.Functions.SetPlayerData('job', 'onduty', true) -- Assuming 'onduty' is the duty status for the job
-    print("debug2")
+--REPAIR SYSTEM
 
-end)
-
-
---Register the command
+--Register the repair vehicle command
 RegisterCommand('repairveh', function()
 
     --get the player
@@ -95,4 +88,19 @@ RegisterCommand('repairveh', function()
         end
     end
 end)
+
+
+
+
+-- JOB MENU
+RegisterCommand('+vabJobMenu', function()
+    openJobMenu()
+end)
+
+AddEventHandler('astroRP:vabJobMenu', function()
+    openJobMenu()
+end)
+
+RegisterKeyMapping('+vabJobMenu', 'Open Job Menu', 'keyboard', Config.jobMenu)
+
 
