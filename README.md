@@ -1,6 +1,6 @@
 # QB-VAB
 **INSTALLATION**
-1) Make sure you **rename the folder to QB-VAB** and not keep the default downloaded folder called QB-VAB-main
+1) download the files
 2) Put the folder in the *[Standalone]* folder, and restart the server
 
 **USAGE**
