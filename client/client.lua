@@ -21,6 +21,7 @@ local QBCore = exports['qb-core']:GetCoreObject()
     return veh
 end
 
+
 --Register the command
 RegisterCommand('repairveh', function()
     --get the vehicle entity
@@ -33,14 +34,21 @@ RegisterCommand('repairveh', function()
 
         -- send's the repairVehicle event, if the networkNetId is found. 
         if vehicleNetId then
-            print("debug 0")
-            TriggerServerEvent('QB-VAB:fixVehicle', vehicleNetId)
-            print("debug 1")
+            print("debug0")
+            local health = GetEntityHealth(vehicle)
+            if health >= 4000 then
+                TriggerServerEvent('QB-VAB:fixVehicle', vehicleNetId)
+                SetVehicleEngineHealth(veh, 1000.0)
+                SetVehicleFixed(veh)
+                SetVehicleDeformationFixed(veh)
+                SetVehicleUndriveable(veh, false)
+                SetVehicleEngineOn(veh, true, true)
+            end
         else
             TriggerEvent('chat:addMessage', {
                 color = { 255, 0, 0},
                 multiline = true,
-                args = {"System", "Could'n find a vehicle!"}
+                args = {"System", "Can't perform this action because the vehicle isn't syncronized with the server"}
             })
         end
     else
@@ -51,3 +59,4 @@ RegisterCommand('repairveh', function()
         })
     end
 end)
+
