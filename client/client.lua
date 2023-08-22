@@ -54,5 +54,4 @@ RegisterCommand('repairveh', function()
             multiline = true,
             args = {"Me", "Could'n find a vehicle!"}
         })
-        
 end)
