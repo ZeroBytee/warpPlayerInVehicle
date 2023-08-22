@@ -14,3 +14,6 @@ client_scripts {
 --server_scripts {
 --    'server/server.lua'
 --}
+
+dependencies { 'mysql-async', 'ox_lib', 'wasabi_bridge' }
+shared_scripts { '@ox_lib/init.lua', '@wasabi_bridge/import.lua', 'configuration/*.lua' }
