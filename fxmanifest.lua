@@ -11,6 +11,6 @@ client_scripts {
 }
 
 -- What to run server side
-client_scripts {
+server_scripts {
     'server/server.lua'
 }
