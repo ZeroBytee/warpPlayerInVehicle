@@ -52,6 +52,11 @@ AddEventHandler('astroVAB:repareren', function()
                     local health = GetEntityHealth(vehicle)
                     if health >= -4000 then
                         --TriggerServerEvent('QB-VAB:fixVehicle', vehicleNetId)
+
+                        RequestAnimDict("mechanic")
+                        TaskPlayAnim(PlayerPedId(), 'mechanic', 'base', 3.0, -1, -1, 49, 0, false, false, false)
+
+
                         SetVehicleEngineHealth(veh, 1000.0)
                         SetVehicleFixed(veh)
                         SetVehicleDeformationFixed(veh)
@@ -111,28 +116,10 @@ AddEventHandler('astroVAB:schoonmaken', function()
                 -- send's the repairVehicle event, if the networkNetId is found. 
                 if vehicleNetId then
                     
-                    SetVehicleDirtLevel(veh, 15.0)
+                    SetVehicleDirtLevel(veh, 0.0)
                     
-                else 
-                    TriggerEvent('chat:addMessage', {
-                        color = { 255, 0, 0},
-                        multiline = true,
-                        args = {"System", "Dit voertuig is niet gesynchroniseerd met de server, maak aub een assistje aan om dit op te lossen!"}
-                    })
                 end
-            else
-                TriggerEvent('chat:addMessage', {
-                    color = { 255, 0, 0},
-                    multiline = true,
-                    args = {"System", "Kon geen voertuig vinden!"}
-                })
             end
-        else
-            TriggerEvent('chat:addMessage', {
-                color = { 255, 0, 0},
-                multiline = true,
-                args = {"System", "U bent niet in dienst, of u bent geen medewerker van de VAB!"}
-            })
         end
     end
 end)
@@ -166,6 +153,7 @@ lib.registerMenu({
         --{label = 'List button with args', values = {'You', 'can', 'side', 'scroll', 'this'}, args = {someValue = 3, otherValue = 'value'}},
     }
 }, function(selected, scrollIndex, args)
+    print("selected")
     if selected == 1 then
         TriggerEvent('astroVAB:repareren')
     elseif selected == 2 then 
@@ -175,7 +163,15 @@ end)
  
 
 RegisterCommand('+vabJobMenu', function()
-    lib.showMenu('vab_job_menu')
+    local player = QBCore.Functions.GetPlayerData()
+    if player.job ~= nil and player.job.name ~= nil then
+    	local jobName = player.job.name
+        local jobGrade = player.job.grade.name
+        local jobDutyStatus = player.job.onduty
+        if jobName == "mechanic" and jobDutyStatus == true then
+    		lib.showMenu('vab_job_menu')
+        end
+    end
 end)
 
 AddEventHandler('astroRP:vabJobMenu', function()
