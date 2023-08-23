@@ -168,10 +168,10 @@ lib.registerMenu({
 }, function(selected, scrollIndex, args)
     if selected == 1 then
         TriggerEvent('astroVAB:repareren')
-    else if selected == 2 then 
+    elseif selected == 2 then 
         TriggerEvent('astroVAB:schoonmaken')
     end
-end
+end)
  
 
 RegisterCommand('+vabJobMenu', function()
