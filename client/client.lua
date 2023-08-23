@@ -131,7 +131,7 @@ AddEventHandler('astroVAB:schoonmaken', function()
             TriggerEvent('chat:addMessage', {
                 color = { 255, 0, 0},
                 multiline = true,
-                args = {"System", ""}
+                args = {"System", "U bent niet in dienst, of u bent geen medewerker van de VAB!"}
             })
         end
     end
