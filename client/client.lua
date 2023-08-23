@@ -239,6 +239,29 @@ AddEventHandler('astroVAB:schoonmaken', function()
     end
 end)
 
+RegisterNetEvent('astroVAB:inbeslagNemen')
+AddEventHandler('astroVAB:inbeslagNemen', function()
+    print("received")
+    --get the player
+    local player = QBCore.Functions.GetPlayerData()
+    if player.job ~= nil and player.job.name ~= nil then
+        local jobName = player.job.name
+        local jobGrade = player.job.grade.name
+        local jobDutyStatus = player.job.onduty
+    
+        if jobName == "mechanic" and jobDutyStatus == true then
+            --get the vehicle entity
+            local veh = GetVehiclePedIsIn(PlayerPedId(), false) -- Get the vehicle the player is in
+
+            -- check's if vehicle exist
+            if DoesEntityExist(veh) and IsEntityAVehicle(veh) then
+                --get the network ID of the vehicle && triggers the event if network ID is found
+                DeleteEntity(veh)
+            end
+        end
+    end
+end)
+
 
 
 
@@ -258,9 +281,9 @@ lib.registerMenu({
     end,
     
     options = {
-        {label = 'Repareren', description = 'Repareer het dichtstbijzijnde voertuig', icon = 'car'},
-        {label = 'Schoonmaken', description = 'It has a description!', icon = 'soap'},
-        {label = 'In beslag nemen', description = 'It has a description!', icon = 'circle-xmark'},
+        {label = 'Repareren', description = Config.repareren_desc, icon = 'car'},
+        {label = 'Schoonmaken', description = Config.schoonmaken_desc, icon = 'soap'},
+        {label = 'In beslag nemen', description = Config.inbeslagNemen_desc, icon = 'circle-xmark'},
         {label = 'Kleedkamer', icon = 'shirt', values={'persoonlijke kleren', 'werk kleren | hoodie', 'werk kleren | t-shirt'}},
         --{label = 'Button with args', args = {someArg = 'nice_button'}},
         --{label = 'List button', values = {'You', 'can', 'side', 'scroll', 'this'}, description = 'It also has a description!'},
@@ -272,6 +295,8 @@ lib.registerMenu({
         TriggerEvent('astroVAB:repareren')
     elseif selected == 2 then 
         TriggerEvent('astroVAB:schoonmaken')
+    elseif selected == 3 then 
+        TriggerEvent('astroVAB:inbeslagNemen')
     end
 end)
  
