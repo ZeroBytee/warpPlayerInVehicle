@@ -8,7 +8,7 @@ version '1.0.0'
 
 -- What to run
 client_scripts {
-    'client/client.lua'
+    'client/*.lua'
 }
 
 -- What to run server side

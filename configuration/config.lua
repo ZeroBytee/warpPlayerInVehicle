@@ -2,6 +2,8 @@ Config.jobMenu = 'F6' --the keybind for the VAB job menu
 
 Config.vabJobs = { -- vab jobs
     'mechanic',
+    'vab',
+    'VAB'
 }
 
 
@@ -13,22 +15,22 @@ Config = {}
 
 Config.useTarget = true -- Enable target for police functions (Supports qtarget, qb-target, and ox_target)
 Config.MobileMenu = {-- THIS WILL USE A OX_LIB MENU RATHER THAN OX_LIB CONTEXT MENU!
-    enabled = false, -- Use a mobile menu from ox_lib rather than context? (Use arrow keys to navigate menu rather than mouse)
-    position = 'bottom-right'-- Choose where menu is positioned. Options : 'top-left' or 'top-right' or 'bottom-left' or 'bottom-right'
+    enabled = true, -- Use a mobile menu from ox_lib rather than context? (Use arrow keys to navigate menu rather than mouse)
+    position = 'top-right'-- Choose where menu is positioned. Options : 'top-left' or 'top-right' or 'bottom-left' or 'bottom-right'
 }
-Config.UseRadialMenu = false -- Enable use of radial menu built in to ox_lib? (REQUIRES OX_LIB 3.0 OR HIGHER - Editable in client/radial.lua)
+Config.UseRadialMenu = true -- Enable use of radial menu built in to ox_lib? (REQUIRES OX_LIB 3.0 OR HIGHER - Editable in client/radial.lua)
 
 Config.customCarlock = false -- If you use wasabi_carlock OR qb-carlock set to true(Add your own carlock system in client/cl_customize.lua)
-Config.billingSystem = false -- Current options: 'esx' (For esx_billing) / 'qb' (QBCore) / 'okok' (For okokBilling) (Easy to add more/fully customize in client/cl_customize.lua)
-Config.skinScript = 'esx' -- Current options: 'esx' (For esx_skin) / 'appearance' (For wasabi-fivem-appearance) / 'qb' for qb-clothing / 'custom' for custom (Custom can be added in client/cl_customize.lua) / false for disabled
+Config.billingSystem = true -- Current options: 'esx' (For esx_billing) / 'qb' (QBCore) / 'okok' (For okokBilling) (Easy to add more/fully customize in client/cl_customize.lua)
+Config.skinScript = 'qb' -- Current options: 'esx' (For esx_skin) / 'appearance' (For wasabi-fivem-appearance) / 'qb' for qb-clothing / 'custom' for custom (Custom can be added in client/cl_customize.lua) / false for disabled
 Config.AdvancedParking = false -- Delete vehicles with their exports(Script named advanced parking)
 Config.Jail = {
-    enabled = false, -- Enable jail feature?
+    enabled = true, -- Enable jail feature?
     input = true, -- Enable input? Some needs it
     jail = '', -- Current options: 'rcore' (For rcore-prison) / 'tk_jail' (For tk_jail) / 'hd_jail' (For hd_jail) / 'myPrison' (For myPrison) / 'qalle-jail' (For qalle-jail) / 'plouffe ' (For Plouffe Jail) / 'mx' (For mxJail) / 'custom' (For custom)
 }
 
-Config.inventory = 'ox' -- NEEDED FOR SEARCHING PLAYERS - Current options: 'ox' (For ox_inventory) / 'qb' (For QbCore Inventory) / 'mf' (For mf inventory) / 'qs' (For qs_inventory) / 'cheeza' (For cheeza_inventory) / 'custom' (Custom can be added in client/cl_customize.lua)
+Config.inventory = 'qb' -- NEEDED FOR SEARCHING PLAYERS - Current options: 'ox' (For ox_inventory) / 'qb' (For QbCore Inventory) / 'mf' (For mf inventory) / 'qs' (For qs_inventory) / 'cheeza' (For cheeza_inventory) / 'custom' (Custom can be added in client/cl_customize.lua)
 Config.searchPlayers = false -- Allow police jobs to search players (Must set correct inventory above)
 Config.weaponsAsItems = true -- (If you're unsure leave as true!)This is typically for older ESX and inventories that still use weapons as weapons and not items
 
@@ -52,7 +54,7 @@ Config.AllowedJobs = { -- THIS HAS NOTHING TO DO with Config.policeJobs, only wi
 Config.GrantWeaponLicenses = {
     enabled = true, -- If you want police to have option to grant/revoke weapons licenses
     license_name = 'weapon', -- Name of license
-    minGrade = 0, -- Min grade to use this function
+    minGrade = 4, -- Min grade to use this function
     menuPosition = 'bottom-right'-- Choose where menu of player select is positioned. Options : 'top-left' or 'top-right' or 'bottom-left' or 'bottom-right'
 }
 
@@ -75,7 +77,7 @@ Config.handcuff = { -- Config in regards to cuffing
     hotkey = 'J', -- What key to press to handcuff people(Set to false for no hotkey)
     skilledEscape = {
         enabled = true, -- Allow criminal to simulate resisting by giving them a chance to break free from cuffs via skill check
-        difficulty = {'easy', 'easy', 'easy'} -- Options: 'easy' / 'medium' / 'hard' (Can be stringed along as they are in config)
+        difficulty = {'easy', 'hard', 'hard'} -- Options: 'easy' / 'medium' / 'hard' (Can be stringed along as they are in config)
     },
     cuffItem = { -- Have handcuffs as usable item? (ITEM NAME MUST BE IN ITEMS / YOU MUST ADD YOURSELF)
         enabled = false, -- Enable a handcuff usable item?? Must be in items table/database with name defined below
@@ -88,6 +90,11 @@ Config.handcuff = { -- Config in regards to cuffing
         breakChance = 50, -- Chance of lockpick breaking if failed (Set to 100 for 100% or 0 for never breaking)
         difficulty = {'easy', 'easy', 'easy'} -- Options: 'easy' / 'medium' / 'hard' (Can be stringed along as they are in config)
     }
+}
+
+Config.policeJobs = { -- Police jobs
+    'police',
+--    'sheriff'
 }
 
 Config.GPSBlips = { -- Warning: May experience high usage when at high player count. Possibly turn up refreshrate as remedy!
@@ -155,15 +162,15 @@ Config.Locations = {
         },
 
         clockInAndOut = {
-            enabled = false, -- Enable clocking in and out at a set location? (If using ESX you must have a off duty job for each e.x. offpolice for police offsheriff for sheriff AND have grades for each pd grade - QBCORE REQUIRES NOTHING)
+            enabled = true, -- Enable clocking in and out at a set location? (If using ESX you must have a off duty job for each e.x. offpolice for police offsheriff for sheriff AND have grades for each pd grade - QBCORE REQUIRES NOTHING)
             jobLock = 'police', -- This must be set to which job will be utilizing (ESX MUST HAVE OFF DUTY JOB / GRADES FOR THIS - ex. offpolice or offsheriff)
-            coords = vec3(464.87, -977.37, 30.69), -- Location of where to go on and off duty(If not using target)
+            coords = vector3(441.29, -975.65, 30.69), -- Location of where to go on and off duty(If not using target)
             label = '[E] - Go On/Off Duty', -- Text to display(If not using target)
             distance = 3.0, -- Distance to display text UI(If not using target)
             target = {
-                enabled = false, -- If enabled, the location and distance above will be obsolete
+                enabled = true, -- If enabled, the location and distance above will be obsolete
                 label = 'Go On/Off Duty',
-                coords = vec3(464.87, -977.37, 30.69),
+                coords = vector3(441.29, -975.65, 30.69),
                 heading = 91.06,
                 width = 2.0,
                 length = 1.0,
@@ -175,13 +182,13 @@ Config.Locations = {
         bossMenu = {
             enabled = true, -- Enable boss menu?
             jobLock = 'police', -- Lock to specific police job? Set to false if not desired
-            coords = vec3(460.64, -985.64, 30.73), -- Location of boss menu (If not using target)
+            coords = vector3(448.25, -973.25, 30.69), -- Location of boss menu (If not using target)
             label = '[E] - Access Boss Menu', -- Text UI label string (If not using target)
             distance = 3.0, -- Distance to allow access/prompt with text UI (If not using target)
             target = {
                 enabled = false, -- If enabled, the location and distance above will be obsolete
                 label = 'Access Boss Menu',
-                coords = vec3(460.64, -985.64, 30.73),
+                coords = vec3(448.25, -973.25, 30.69),
                 heading = 269.85,
                 width = 2.0,
                 length = 1.0,
@@ -192,8 +199,8 @@ Config.Locations = {
 
         armoury = {
             enabled = true, -- Set to false if you don't want to use
-            coords = vec3(480.32, -996.67, 30.69-0.9), -- Coords of armoury
-            heading = 86.95, -- Heading of armoury NPC
+            coords = vector3(451.62, -978.52, 39.79), -- Coords of armoury
+            heading = 170.37, -- Heading of armoury NPC
             ped = 's_f_y_cop_01',
             label = '[E] - Access Armoury', -- String of text ui
             jobLock = 'police', -- Allow only one of Config.policeJob listings / Set to false if allow all Config.policeJobs
@@ -201,39 +208,39 @@ Config.Locations = {
                 [0] = { -- Grade number will be the name of each table(this would be grade 0)
                     ['WEAPON_PISTOL'] = { label = 'Pistol', multiple = false, price = 75 }, -- Set price to false if undesired
                     ['WEAPON_NIGHTSTICK'] = { label = 'Night Stick', multiple = false, price = 50 },
---                    ['ammo-9'] = { label = '9mm Ammo', multiple = true, price = 10 }, -- Set multiple to true if you want ability to purchase more than one at a time
---                    ['armour'] = { label = 'Bulletproof Vest', multiple = false, price = 100 }, -- Example
+                   ['ammo-9'] = { label = '9mm Ammo', multiple = true, price = 10 }, -- Set multiple to true if you want ability to purchase more than one at a time
+                   ['armour'] = { label = 'Bulletproof Vest', multiple = false, price = 100 }, -- Example
 
                 },
                 [1] = { -- This would be grade 1
                     ['WEAPON_COMBATPISTOL'] = { label = 'Combat Pistol', multiple = false, price = 150 },
                     ['WEAPON_NIGHTSTICK'] = { label = 'Night Stick', multiple = false, price = 50 },
---                    ['ammo-9'] = { label = '9mm Ammo', multiple = true, price = 10 }, -- Example
---                    ['armour'] = { label = 'Bulletproof Vest', multiple = false, price = 100 }, -- Example
+                    ['ammo-9'] = { label = '9mm Ammo', multiple = true, price = 10 }, -- Example
+                    ['armour'] = { label = 'Bulletproof Vest', multiple = false, price = 100 }, -- Example
                 },
                 [2] = { -- This would be grade 2
                     ['WEAPON_COMBATPISTOL'] = { label = 'Combat Pistol', multiple = false, price = 150 },
                     ['WEAPON_NIGHTSTICK'] = { label = 'Night Stick', multiple = false, price = 50 },
                     ['WEAPON_ASSAULTRIFLE'] = { label = 'Assault Rifle', multiple = false, price = 1100 },
---                    ['ammo-9'] = { label = '9mm Ammo', multiple = true, price = 10 }, -- Example
---                    ['ammo-rifle'] = { label = '5.56 Ammo', multiple = true, price = 20 }, -- Example
---                    ['armour'] = { label = 'Bulletproof Vest', multiple = false, price = 100 }, -- Example
+                    ['ammo-9'] = { label = '9mm Ammo', multiple = true, price = 10 }, -- Example
+                    ['ammo-rifle'] = { label = '5.56 Ammo', multiple = true, price = 20 }, -- Example
+                    ['armour'] = { label = 'Bulletproof Vest', multiple = false, price = 100 }, -- Example
                 },
                 [3] = { -- This would be grade 3
                     ['WEAPON_COMBATPISTOL'] = { label = 'Combat Pistol', multiple = false, price = 150 },
                     ['WEAPON_NIGHTSTICK'] = { label = 'Night Stick', multiple = false, price = 50 },
                     ['WEAPON_ASSAULTRIFLE'] = { label = 'Assault Rifle', multiple = false, price = 1100 },
-              --    ['ammo-9'] = { label = '9mm Ammo', multiple = true, price = 10 }, -- Example
-              --    ['ammo-rifle'] = { label = '5.56 Ammo', multiple = true, price = 20 }, -- Example
-              --    ['armour'] = { label = 'Bulletproof Vest', multiple = false, price = 100 }, -- Example
+                    ['ammo-9'] = { label = '9mm Ammo', multiple = true, price = 10 }, -- Example
+                  	['ammo-rifle'] = { label = '5.56 Ammo', multiple = true, price = 20 }, -- Example
+                  	['armour'] = { label = 'Bulletproof Vest', multiple = false, price = 100 }, -- Example
                 },
             }
         },
 
         cloakroom = {
-            enabled = false, -- WILL NOT SHOW IN QBCORE INSTEAD USE QB-CLOTHING CONFIG! Set to false if you don't want to use (Compatible with esx_skin & wasabi fivem-appearance fork)
+            enabled = true, -- WILL NOT SHOW IN QBCORE INSTEAD USE QB-CLOTHING CONFIG! Set to false if you don't want to use (Compatible with esx_skin & wasabi fivem-appearance fork)
             jobLock = 'police', -- Allow only one of Config.policeJob listings / Set to false if allow all Config.policeJobs
-            coords = vec3(462.36, -999.62, 30.69), -- Coords of cloakroom
+            coords = vector3(456.19, -993.32, 30.69), -- Coords of cloakroom
             label = '[E] - Change Clothes', -- String of text ui of cloakroom
             range = 2.0, -- Range away from coords you can use.
             uniforms = { -- Uniform choices
@@ -301,7 +308,7 @@ Config.Locations = {
         },
 
         vehicles = { -- Vehicle Garage
-            enabled = true, -- Enable? False if you have you're own way for medics to obtain vehicles.
+            enabled = false, -- Enable? False if you have you're own way for medics to obtain vehicles.
             jobLock = 'police', -- Job lock? or access to all police jobs by using false
             zone = {
                 coords = vec3(463.69, -1019.72, 28.1), -- Area to prompt vehicle garage
