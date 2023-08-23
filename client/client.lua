@@ -3,6 +3,11 @@ local QBCore = exports['qb-core']:GetCoreObject()
 -- -=-=-=-=-=-=-
 -- GLOBAL FUNCTIONS
 -- -=-=-=-=-=-=-
+
+-- LOCAL VARIABLES
+local isDoingMechanicEmote = false
+local isDoingCleaningEmote = false
+
 -- Function to get closest vehicle from the ped
  function getClosestVehicleFromPedPos(ped, maxDistance, maxHeight)
     local veh = nil
@@ -24,12 +29,131 @@ local QBCore = exports['qb-core']:GetCoreObject()
     return veh
 end
 
-local function loadAnimDict(dict)
+function loadAnimDict(dict)
     while (not HasAnimDictLoaded(dict)) do
         RequestAnimDict(dict)
         Wait(5)
     end
 end
+
+function disableMovement()
+    DisableControlAction(0, 30, true) -- A (Left)
+    DisableControlAction(0, 31, true) -- S (Backward)
+    DisableControlAction(0, 32, true) -- W (Forward)
+    DisableControlAction(0, 33, true) -- D (Right)
+    DisableControlAction(0, 34, true) -- Q (Move Left)
+    DisableControlAction(0, 35, true) -- E (Move Right)
+    DisableControlAction(0, 36, true) -- Shift (Sprint)
+    DisableControlAction(0, 44, true) -- Q (Cover)
+    DisableControlAction(0, 45, true) -- E (Reload)
+end 
+
+function enableMovement()
+    DisableControlAction(0, 30, false) -- A (Left)
+    DisableControlAction(0, 31, false) -- S (Backward)
+    DisableControlAction(0, 32, false) -- W (Forward)
+    DisableControlAction(0, 33, false) -- D (Right)
+    DisableControlAction(0, 34, false) -- Q (Move Left)
+    DisableControlAction(0, 35, false) -- E (Move Right)
+    DisableControlAction(0, 36, false) -- Shift (Sprint)
+    DisableControlAction(0, 44, false) -- Q (Cover)
+    DisableControlAction(0, 45, false) -- E (Reload)
+end
+
+
+function StartMechanicEmote()
+    if not isDoingMechanicEmote then
+        if not isDoingCleaningEmote then 
+            isDoingMechanicEmote = true
+        
+            local playerPed = PlayerPedId()
+            local vehicle = getClosestVehicleFromPedPos(playerPed, 4, 3) -- Adjust the distance as needed
+            
+            if DoesEntityExist(vehicle) then
+                local playerCoords = GetEntityCoords(playerPed)
+                local vehicleCoords = GetEntityCoords(vehicle)
+                
+                local direction = vector3(vehicleCoords.x - playerCoords.x, vehicleCoords.y - playerCoords.y, 0.0)
+                local heading = math.atan2(direction.y, direction.x)
+                
+                SetEntityHeading(playerPed, math.deg(heading) - 90) -- Adjust the heading by 90 degrees
+                
+                -- Trigger the emote command
+                ExecuteCommand("e mechanic")
+                
+                Citizen.CreateThread(function()
+                    local duration = 4000
+                    local startTime = GetGameTimer()
+                    
+                    while isDoingMechanicEmote do
+                        Citizen.Wait(0)
+    
+                        disableMovement()
+                        
+                        if GetGameTimer() - startTime >= duration then
+                            ClearPedTasks(playerPed)
+                            isDoingMechanicEmote = false
+                        end
+                    end
+    
+                    enableMovement()
+                    
+                end)
+            else
+                print("No vehicle found nearby.")
+            end
+        end
+        
+    end
+end
+
+
+function StartCleaningEmote()
+    if not isDoingCleaningEmote then
+        if not isDoingMechanicEmote then
+            isDoingCleaningEmote = true
+        
+            local playerPed = PlayerPedId()
+            local vehicle = getClosestVehicleFromPedPos(playerPed, 4, 3) -- Adjust the distance as needed
+            
+            if DoesEntityExist(vehicle) then
+                local playerCoords = GetEntityCoords(playerPed)
+                local vehicleCoords = GetEntityCoords(vehicle)
+                
+                local direction = vector3(vehicleCoords.x - playerCoords.x, vehicleCoords.y - playerCoords.y, 0.0)
+                local heading = math.atan2(direction.y, direction.x)
+                
+                SetEntityHeading(playerPed, math.deg(heading) - 90) -- Adjust the heading by 90 degrees
+                
+                -- Trigger the emote command
+                ExecuteCommand("e clean")
+                
+                Citizen.CreateThread(function()
+                    local duration = 6000
+                    local startTime = GetGameTimer()
+                    
+                    while isDoingCleaningEmote do
+                        Citizen.Wait(0)
+                        
+                        disableMovement()
+
+                        if GetGameTimer() - startTime >= duration then
+                            ClearPedTasks(playerPed)
+                            isDoingCleaningEmote = false
+                        end
+                    end
+
+                    enableMovement()
+
+                end)
+            else
+                print("No vehicle found nearby.")
+            end
+        end
+    end
+end
+
+
 
 -- -=-=-=-=-=-=-
 --CORE SYSTEM
@@ -59,46 +183,25 @@ AddEventHandler('astroVAB:repareren', function()
                     local health = GetEntityHealth(vehicle)
                     if health >= -4000 then
                         --TriggerServerEvent('QB-VAB:fixVehicle', vehicleNetId)
-                        
-                        local dir = "missmechanic"
 
-                        print("playing animation!")
-                        loadAnimDict(dir)
-                        TaskPlayAnim(PlayerPedId(), dir, "work_in" ,3.0, 3.0, -1, 16, 0, false, false, false)
-                        print("playing animation ended!")
+                        StartMechanicEmote()
+                        Citizen.Wait(6000)
+                        
+                        --local dir = "missmechanic"
+                        --print("playing animation!")
+                        --loadAnimDict(dir)
+                        --TaskPlayAnim(PlayerPedId(), dir, "work_in" ,3.0, 3.0, -1, 16, 0, false, false, false)
+                        --print("playing animation ended!")
+
                         
                         SetVehicleEngineHealth(veh, 1000.0)
                         SetVehicleFixed(veh)
                         SetVehicleDeformationFixed(veh)
                         SetVehicleUndriveable(veh, false)
                         SetVehicleEngineOn(veh, true, true)
-                    else 
-                        TriggerEvent('chat:addMessage', {
-                            color = { 255, 0, 0},
-                            multiline = true,
-                            args = {"System", "Dit voertuig is te hard beschadigd!"}
-                        })
                     end
-                else
-                    TriggerEvent('chat:addMessage', {
-                        color = { 255, 0, 0},
-                        multiline = true,
-                        args = {"System", "Dit voertuig is niet gesynchroniseerd met de server, maak aub een assistje aan om dit op te lossen!"}
-                    })
                 end
-            else
-                TriggerEvent('chat:addMessage', {
-                    color = { 255, 0, 0},
-                    multiline = true,
-                    args = {"System", "Kon geen voertuig vinden!"}
-                })
             end
-        else
-            TriggerEvent('chat:addMessage', {
-                color = { 255, 0, 0},
-                multiline = true,
-                args = {"System", "U bent niet in dienst, of u bent geen medewerker van de VAB!"}
-            })
         end
     end
 end)
@@ -126,6 +229,8 @@ AddEventHandler('astroVAB:schoonmaken', function()
                 -- send's the repairVehicle event, if the networkNetId is found. 
                 if vehicleNetId then
                     
+                    StartCleaningEmote()
+                    Citizen.Wait(4000)
                     SetVehicleDirtLevel(veh, 0.0)
                     
                 end
@@ -163,7 +268,6 @@ lib.registerMenu({
         --{label = 'List button with args', values = {'You', 'can', 'side', 'scroll', 'this'}, args = {someValue = 3, otherValue = 'value'}},
     }
 }, function(selected, scrollIndex, args)
-    print("selected")
     if selected == 1 then
         TriggerEvent('astroVAB:repareren')
     elseif selected == 2 then 
