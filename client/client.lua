@@ -24,6 +24,13 @@ local QBCore = exports['qb-core']:GetCoreObject()
     return veh
 end
 
+local function loadAnimDict(dict)
+    while (not HasAnimDictLoaded(dict)) do
+        RequestAnimDict(dict)
+        Wait(5)
+    end
+end
+
 -- -=-=-=-=-=-=-
 --CORE SYSTEM
 -- -=-=-=-=-=-=-
@@ -52,11 +59,14 @@ AddEventHandler('astroVAB:repareren', function()
                     local health = GetEntityHealth(vehicle)
                     if health >= -4000 then
                         --TriggerServerEvent('QB-VAB:fixVehicle', vehicleNetId)
+                        
+                        local dir = "missmechanic"
 
-                        RequestAnimDict("mechanic")
-                        TaskPlayAnim(PlayerPedId(), 'mechanic', 'base', 3.0, -1, -1, 49, 0, false, false, false)
-
-
+                        print("playing animation!")
+                        loadAnimDict(dir)
+                        TaskPlayAnim(PlayerPedId(), dir, "work_in" ,3.0, 3.0, -1, 16, 0, false, false, false)
+                        print("playing animation ended!")
+                        
                         SetVehicleEngineHealth(veh, 1000.0)
                         SetVehicleFixed(veh)
                         SetVehicleDeformationFixed(veh)
