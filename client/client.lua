@@ -8,6 +8,9 @@ local QBCore = exports['qb-core']:GetCoreObject()
 local isDoingMechanicEmote = false
 local isDoingCleaningEmote = false
 
+local schoonmakenDur = Config.schoonmaken_dur
+local reparerenDur = Config.repareren_dur
+
 -- Function to get closest vehicle from the ped
  function getClosestVehicleFromPedPos(ped, maxDistance, maxHeight)
     local veh = nil
@@ -82,7 +85,7 @@ function StartMechanicEmote()
                 ExecuteCommand("e mechanic")
                 
                 Citizen.CreateThread(function()
-                    local duration = 4000
+                    local duration = reparerenDur
                     local startTime = GetGameTimer()
                     
                     while isDoingMechanicEmote do
@@ -129,7 +132,7 @@ function StartCleaningEmote()
                 ExecuteCommand("e clean")
                 
                 Citizen.CreateThread(function()
-                    local duration = 6000
+                    local duration = schoonmakenDur
                     local startTime = GetGameTimer()
                     
                     while isDoingCleaningEmote do
@@ -185,7 +188,7 @@ AddEventHandler('astroVAB:repareren', function()
                         --TriggerServerEvent('QB-VAB:fixVehicle', vehicleNetId)
 
                         StartMechanicEmote()
-                        Citizen.Wait(6000)
+                        Citizen.Wait(reparerenDur)
                         
                         --local dir = "missmechanic"
                         --print("playing animation!")
@@ -230,7 +233,7 @@ AddEventHandler('astroVAB:schoonmaken', function()
                 if vehicleNetId then
                     
                     StartCleaningEmote()
-                    Citizen.Wait(4000)
+                    Citizen.Wait(schoonmakenDur)
                     SetVehicleDirtLevel(veh, 0.0)
                     
                 end
@@ -264,6 +267,7 @@ end)
 
 local originalPedVariation = nil
 local originalPedTexture = nil
+local vabClothesOn = false
 
 RegisterNetEvent('astroVAB:kleedkamer')
 AddEventHandler('astroVAB:kleedkamer', function(scrollIndex)
@@ -278,22 +282,25 @@ AddEventHandler('astroVAB:kleedkamer', function(scrollIndex)
         if jobName == "mechanic" and jobDutyStatus == true then
             local playerPed = GetPlayerPed(-1)
 
-            if originalPedVariation == nil then 
+            if vabClothesOn == false then 
                 originalPedVariation = GetPedDrawableVariation(playerPed, 11)
                 originalPedTexture = GetPedTextureVariation(playerPed, 11)
             end
             if scrollIndex == 1 then
-                SetPedComponentVariation(playerPed, 11, originalPedVariation, originalPedTexture, 0) -- Reset vest/tops to default
+                SetPedComponentVariation(playerPed, 11, originalPedVariation, originalPedTexture, 0)
             else 
                 if jobGrade == "Novice" then  
-                    SetPedComponentVariation(playerPed, 11, 1, 0, 0) -- Reset vest/tops to default
+                    SetPedComponentVariation(playerPed, 11, 1, 0, 0)
+                    vabClothesOn = true
                 elseif jobGrade == "Experienced" then  
-                    SetPedComponentVariation(playerPed, 11, 9, 0, 0) -- Reset vest/tops to default
+                    SetPedComponentVariation(playerPed, 11, 9, 0, 0)
+                    vabClothesOn = true
                 elseif jobGrade == "Advanced" then  
-                    SetPedComponentVariation(playerPed, 11, 13, 0, 0) -- Reset vest/tops to default
-                elseif jobGrade == "CEO" then  
-                    SetPedComponentVariation(playerPed, 11, originalPedVariation, originalPedTexture, 0) -- Reset vest/tops to default
-                    --SetPedComponentVariation(playerPed, 11, 13, 0, 0) -- Reset vest/tops to default
+                    SetPedComponentVariation(playerPed, 11, 13, 0, 0)
+                    vabClothesOn = true
+                elseif jobGrade == "CEO" then
+                    SetPedComponentVariation(playerPed, 11, 13, 0, 0) -- monteur clothes, change
+                    vabClothesOn = true
                 end
             end
         end
