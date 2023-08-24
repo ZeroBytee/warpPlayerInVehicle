@@ -12,9 +12,7 @@ client_scripts {
 }
 
 -- What to run server side
---server_scripts {
---    'server/server.lua'
---}
+--server_script 'server/server.lua'
 
 dependencies { 'mysql-async', 'ox_lib', 'wasabi_bridge' }
 shared_scripts { '@ox_lib/init.lua', '@wasabi_bridge/import.lua', 'configuration/*.lua' }

@@ -241,7 +241,6 @@ end)
 
 RegisterNetEvent('astroVAB:inbeslagNemen')
 AddEventHandler('astroVAB:inbeslagNemen', function()
-    print("received")
     --get the player
     local player = QBCore.Functions.GetPlayerData()
     if player.job ~= nil and player.job.name ~= nil then
@@ -262,6 +261,50 @@ AddEventHandler('astroVAB:inbeslagNemen', function()
     end
 end)
 
+
+local originalPedVariation = nil
+local originalPedTexture = nil
+
+RegisterNetEvent('astroVAB:kleedkamer')
+AddEventHandler('astroVAB:kleedkamer', function(scrollIndex)
+    --get the player
+    local player = QBCore.Functions.GetPlayerData()
+    if player.job ~= nil and player.job.name ~= nil then
+        local jobName = player.job.name
+        local jobDutyStatus = player.job.onduty
+        local jobGrade = player.job.grade.name
+        
+    
+        if jobName == "mechanic" and jobDutyStatus == true then
+            local playerPed = GetPlayerPed(-1)
+
+            if originalPedVariation == nil then 
+                originalPedVariation = GetPedDrawableVariation(playerPed, 11)
+                originalPedTexture = GetPedTextureVariation(playerPed, 11)
+            end
+            if scrollIndex == 1 then
+                SetPedComponentVariation(playerPed, 11, originalPedVariation, originalPedTexture, 0) -- Reset vest/tops to default
+            else 
+                if jobGrade == "Novice" then  
+                    SetPedComponentVariation(playerPed, 11, 1, 0, 0) -- Reset vest/tops to default
+                elseif jobGrade == "Experienced" then  
+                    SetPedComponentVariation(playerPed, 11, 9, 0, 0) -- Reset vest/tops to default
+                elseif jobGrade == "Advanced" then  
+                    SetPedComponentVariation(playerPed, 11, 13, 0, 0) -- Reset vest/tops to default
+                elseif jobGrade == "CEO" then  
+                    SetPedComponentVariation(playerPed, 11, originalPedVariation, originalPedTexture, 0) -- Reset vest/tops to default
+                    --SetPedComponentVariation(playerPed, 11, 13, 0, 0) -- Reset vest/tops to default
+                end
+            end
+        end
+    end
+end)
+
+
+
+-- TODO: 
+-- create mysql connection and save the player's outfit there
+-- only save the outfit of the people that put on vab clothing
 
 
 
@@ -297,6 +340,9 @@ lib.registerMenu({
         TriggerEvent('astroVAB:schoonmaken')
     elseif selected == 3 then 
         TriggerEvent('astroVAB:inbeslagNemen')
+    elseif selected == 4 then 
+        TriggerEvent('astroVAB:kleedkamer', scrollIndex)
+        --TriggerServerEvent('astroVAB:kleedkamer')
     end
 end)
  
