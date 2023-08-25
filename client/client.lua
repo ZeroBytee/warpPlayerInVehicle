@@ -258,7 +258,7 @@ AddEventHandler('astroVAB:inbeslagNemen', function()
             -- check's if vehicle exist
             if DoesEntityExist(veh) and IsEntityAVehicle(veh) then
                 --get the network ID of the vehicle && triggers the event if network ID is found
-                DeleteEntity(veh)
+                exports['wasabi_police']:impoundVehicle(veh)
             end
         end
     end
