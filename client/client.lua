@@ -258,7 +258,7 @@ AddEventHandler('astroVAB:inbeslagNemen', function()
             -- check's if vehicle exist
             if DoesEntityExist(veh) and IsEntityAVehicle(veh) then
                 --get the network ID of the vehicle && triggers the event if network ID is found
-                exports['wasabi_police']:impoundVehicle(veh)
+                DeleteEntity(veh)
             end
         end
     end
@@ -269,6 +269,7 @@ local originalPedVariation = nil
 local originalPedTexture = nil
 local vabClothesOn = false
 
+
 RegisterNetEvent('astroVAB:kleedkamer')
 AddEventHandler('astroVAB:kleedkamer', function(scrollIndex)
     --get the player
@@ -277,8 +278,9 @@ AddEventHandler('astroVAB:kleedkamer', function(scrollIndex)
         local jobName = player.job.name
         local jobDutyStatus = player.job.onduty
         local jobGrade = player.job.grade.name
-        
-    
+
+
+
         if jobName == "mechanic" and jobDutyStatus == true then
             local playerPed = GetPlayerPed(-1)
 
@@ -299,7 +301,7 @@ AddEventHandler('astroVAB:kleedkamer', function(scrollIndex)
                     SetPedComponentVariation(playerPed, 11, 13, 0, 0)
                     vabClothesOn = true
                 elseif jobGrade == "CEO" then
-                    SetPedComponentVariation(playerPed, 11, 13, 0, 0) -- monteur clothes, change
+                    SetPedComponentVariation(playerPed, 11, 13, 1, 0) -- monteur clothes, change
                     vabClothesOn = true
                 end
             end
