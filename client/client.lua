@@ -165,6 +165,13 @@ end
 RegisterNetEvent('jaga-gangmenu:cuff')
 AddEventHandler('jaga-gangmenu:cuff', function()
 
+    -- TODO: change job to gang when script is fully tested!!!
+    -- TODO: change job to gang when script is fully tested!!!
+    -- TODO: change job to gang when script is fully tested!!!
+    -- TODO: change job to gang when script is fully tested!!!
+    -- TODO: change job to gang when script is fully tested!!!
+
+
     --get the player
     local player = QBCore.Functions.GetPlayerData()
     if player.job ~= nil and player.job.name ~= nil then
@@ -174,36 +181,42 @@ AddEventHandler('jaga-gangmenu:cuff', function()
     
         if jobName == "mechanic" and jobDutyStatus == true then
             --get the vehicle entity
-            local veh = getClosestVehicleFromPedPos(PlayerPedId(), 4, 3)
+            local target = QBCore.Functions.GetClosestPed
 
-            -- check's if vehicle exist
-            if DoesEntityExist(veh) and IsEntityAVehicle(veh) then
-                --get the network ID of the vehicle && triggers the event if network ID is found
-                local vehicleNetId = NetworkGetNetworkIdFromEntity(veh)
+            if target then
+                -- cuff logic
+            else 
+                print("no player near you!")
+            end
+        end
+    end
+end)
 
-                -- send's the repairVehicle event, if the networkNetId is found. 
-                if vehicleNetId then
-                    local health = GetEntityHealth(vehicle)
-                    if health >= -4000 then
-                        --TriggerServerEvent('QB-VAB:fixVehicle', vehicleNetId)
+RegisterNetEvent('jaga-gangmenu:fouilleren')
+AddEventHandler('jaga-gangmenu:search', function()
 
-                        StartMechanicEmote()
-                        Citizen.Wait(reparerenDur)
-                        
-                        --local dir = "missmechanic"
-                        --print("playing animation!")
-                        --loadAnimDict(dir)
-                        --TaskPlayAnim(PlayerPedId(), dir, "work_in" ,3.0, 3.0, -1, 16, 0, false, false, false)
-                        --print("playing animation ended!")
+    -- TODO: change job to gang when script is fully tested!!!
+    -- TODO: change job to gang when script is fully tested!!!
+    -- TODO: change job to gang when script is fully tested!!!
+    -- TODO: change job to gang when script is fully tested!!!
+    -- TODO: change job to gang when script is fully tested!!!
 
-                        
-                        SetVehicleEngineHealth(veh, 1000.0)
-                        SetVehicleFixed(veh)
-                        SetVehicleDeformationFixed(veh)
-                        SetVehicleUndriveable(veh, false)
-                        SetVehicleEngineOn(veh, true, true)
-                    end
-                end
+
+    --get the player
+    local player = QBCore.Functions.GetPlayerData()
+    if player.job ~= nil and player.job.name ~= nil then
+        local jobName = player.job.name
+        local jobGrade = player.job.grade.name
+        local jobDutyStatus = player.job.onduty
+    
+        if jobName == "mechanic" and jobDutyStatus == true then
+            --get the vehicle entity
+            local target = QBCore.Functions.GetClosestPed
+
+            if target then
+                searchPlayer(target)
+            else 
+                print("no player near you!")
             end
         end
     end
