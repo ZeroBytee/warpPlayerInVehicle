@@ -2,9 +2,9 @@ fx_version 'cerulean'
 game 'gta5'
 lua54 'yes'
 
-author 'GalaxicDev aka John Atlas>'
-description 'just simple repair script for AstroRP'
-version '1.0.0'
+author 'John Atlas aka Galaxic Dev'
+description 'QBcore gang F6 menu'
+version '1.0.1'
 
 -- What to run
 client_scripts {

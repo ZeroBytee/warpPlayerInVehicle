@@ -5,7 +5,7 @@ local QBCore = exports['qb-core']:GetCoreObject()
 -- -=-=-=-=-=-=-
 
 -- LOCAL VARIABLES
-local isDoingMechanicEmote = false
+local isDoingCuffEmote = false
 local isDoingCleaningEmote = false
 
 local schoonmakenDur = Config.schoonmaken_dur
@@ -64,10 +64,10 @@ function enableMovement()
 end
 
 
-function StartMechanicEmote()
-    if not isDoingMechanicEmote then
+function StartCuffEmote()
+    if not isDoingCuffEmote then
         if not isDoingCleaningEmote then 
-            isDoingMechanicEmote = true
+            isDoingCuffEmote = true
         
             local playerPed = PlayerPedId()
             local vehicle = getClosestVehicleFromPedPos(playerPed, 4, 3) -- Adjust the distance as needed
@@ -162,8 +162,8 @@ end
 --CORE SYSTEM
 -- -=-=-=-=-=-=-
 
-RegisterNetEvent('astroVAB:repareren')
-AddEventHandler('astroVAB:repareren', function()
+RegisterNetEvent('jaga-gangmenu:cuff')
+AddEventHandler('jaga-gangmenu:cuff', function()
 
     --get the player
     local player = QBCore.Functions.GetPlayerData()
@@ -210,8 +210,8 @@ AddEventHandler('astroVAB:repareren', function()
 end)
 
 
-RegisterNetEvent('astroVAB:schoonmaken')
-AddEventHandler('astroVAB:schoonmaken', function()
+RegisterNetEvent('jaga-gangmenu:schoonmaken')
+AddEventHandler('jaga-gangmenu:schoonmaken', function()
 
     --get the player
     local player = QBCore.Functions.GetPlayerData()
@@ -242,8 +242,8 @@ AddEventHandler('astroVAB:schoonmaken', function()
     end
 end)
 
-RegisterNetEvent('astroVAB:inbeslagNemen')
-AddEventHandler('astroVAB:inbeslagNemen', function()
+RegisterNetEvent('jaga-gangmenu:inbeslagNemen')
+AddEventHandler('jaga-gangmenu:inbeslagNemen', function()
     --get the player
     local player = QBCore.Functions.GetPlayerData()
     if player.job ~= nil and player.job.name ~= nil then
@@ -270,8 +270,8 @@ local originalPedTexture = nil
 local vabClothesOn = false
 
 
-RegisterNetEvent('astroVAB:kleedkamer')
-AddEventHandler('astroVAB:kleedkamer', function(scrollIndex)
+RegisterNetEvent('jaga-gangmenu:kleedkamer')
+AddEventHandler('jaga-gangmenu:kleedkamer', function(scrollIndex)
     --get the player
     local player = QBCore.Functions.GetPlayerData()
     if player.job ~= nil and player.job.name ~= nil then
@@ -324,8 +324,8 @@ end)
 -- -=-=-=-=-=-=-
 
 lib.registerMenu({
-    id = 'vab_job_menu',
-    title = 'VAB',
+    id = 'jaga_gang_menu',
+    title = 'Gang Menu',
     position = 'top-right',
 
     onSideScroll = function(selected, scrollIndex, args)
@@ -333,45 +333,49 @@ lib.registerMenu({
     end,
     
     options = {
-        {label = 'Repareren', description = Config.repareren_desc, icon = 'car'},
-        {label = 'Schoonmaken', description = Config.schoonmaken_desc, icon = 'soap'},
-        {label = 'In beslag nemen', description = Config.inbeslagNemen_desc, icon = 'circle-xmark'},
-        {label = 'Kleedkamer', icon = 'shirt', values={'persoonlijke kleren', 'werk kleren | hoodie', 'werk kleren | t-shirt'}},
+        {label = 'Boei', description = Config.handboeien_desc, icon = 'handcuffs'},
+        {label = 'Fouilleren', description = Config.schoonmaken_desc, icon = 'hand-wave'},
+        {label = 'In auto steken', description = Config.inbeslagNemen_desc, icon = 'right-to-bracket'},
+        {label = 'Uit auto halen', description = Config.inbeslagNemen_desc, icon = 'circle-xmark'},
         --{label = 'Button with args', args = {someArg = 'nice_button'}},
         --{label = 'List button', values = {'You', 'can', 'side', 'scroll', 'this'}, description = 'It also has a description!'},
         --{label = 'List button with default index', values = {'You', 'can', 'side', 'scroll', 'this'}, defaultIndex = 5},
         --{label = 'List button with args', values = {'You', 'can', 'side', 'scroll', 'this'}, args = {someValue = 3, otherValue = 'value'}},
     }
 }, function(selected, scrollIndex, args)
+    --boeien
     if selected == 1 then
-        TriggerEvent('astroVAB:repareren')
+        TriggerEvent('jaga-gangmenu:repareren')
+    --fouilleren
     elseif selected == 2 then 
-        TriggerEvent('astroVAB:schoonmaken')
+        TriggerEvent('jaga-gangmenu:schoonmaken')
+    --in auto steken
     elseif selected == 3 then 
-        TriggerEvent('astroVAB:inbeslagNemen')
+        TriggerEvent('jaga-gangmenu:inbeslagNemen')
+    -- uit auto halen
     elseif selected == 4 then 
-        TriggerEvent('astroVAB:kleedkamer', scrollIndex)
+        TriggerEvent('jaga-gangmenu:kleedkamer', scrollIndex)
         --TriggerServerEvent('astroVAB:kleedkamer')
     end
 end)
  
 
-RegisterCommand('+vabJobMenu', function()
+RegisterCommand('+gangmenu', function()
     local player = QBCore.Functions.GetPlayerData()
     if player.job ~= nil and player.job.name ~= nil then
     	local jobName = player.job.name
         local jobGrade = player.job.grade.name
         local jobDutyStatus = player.job.onduty
         if jobName == "mechanic" and jobDutyStatus == true then
-    		lib.showMenu('vab_job_menu')
+    		lib.showMenu('jaga_gang_menu')
         end
     end
 end)
 
-AddEventHandler('astroRP:vabJobMenu', function()
-    lib.showMenu('vab_job_menu')
+AddEventHandler('jaga-gangmenu:gangmenu', function()
+    lib.showMenu('jaga_gang_menu')
 end)
 
-RegisterKeyMapping('+vabJobMenu', 'Open Job Menu', 'keyboard', Config.jobMenu)
+RegisterKeyMapping('+gangmenu', 'Open gang menu', 'keyboard', Config.jobMenu)
 
 
