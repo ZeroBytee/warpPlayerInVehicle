@@ -350,6 +350,7 @@ lib.registerMenu({
         {label = 'Fouilleren', description = Config.schoonmaken_desc, icon = 'hand-wave'},
         {label = 'In auto steken', description = Config.inbeslagNemen_desc, icon = 'right-to-bracket'},
         {label = 'Uit auto halen', description = Config.inbeslagNemen_desc, icon = 'circle-xmark'},
+        {label = 'Mee slepen', description = Config.inbeslagNemen_desc, icon = 'person-military-pointing'},
         --{label = 'Button with args', args = {someArg = 'nice_button'}},
         --{label = 'List button', values = {'You', 'can', 'side', 'scroll', 'this'}, description = 'It also has a description!'},
         --{label = 'List button with default index', values = {'You', 'can', 'side', 'scroll', 'this'}, defaultIndex = 5},
