@@ -369,7 +369,9 @@ lib.registerMenu({
     -- uit auto halen
     elseif selected == 4 then 
         TriggerEvent('jaga-gangmenu:kleedkamer', scrollIndex)
-        --TriggerServerEvent('astroVAB:kleedkamer')
+    -- mee slepen
+    elseif selected == 5 then 
+        TriggerEvent('jaga-gangmenu:kleedkamer', scrollIndex)
     end
 end)
  
