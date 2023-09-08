@@ -186,7 +186,12 @@ AddEventHandler('jaga-gangmenu:cuff', function()
     
         if jobName == "mechanic" and jobDutyStatus == true then
             --get the vehicle entity
-            local target = QBCore.Functions.GetClosestPed
+            local coords = GetEntityCoords(PlayerPedId())
+            local closestPed, distance = QBCore.Functions.GetClosestPed(coords)
+            local target
+            if distance <= 5 then
+                target = closestPed
+            end
 
             if target then
                 -- cuff logic
@@ -195,6 +200,7 @@ AddEventHandler('jaga-gangmenu:cuff', function()
                 --isCuffed = lib.callback.await('jaga-gangmenu:isPlayerCuffed')
                 
                 if not isCuffed then
+                    print("cuffing started")
                     isBusy = true
                     local escaped
                     local pdPed = GetPlayerPed(GetPlayerFromServerId(pdId))
@@ -208,12 +214,17 @@ AddEventHandler('jaga-gangmenu:cuff', function()
 	                FreezeEntityPosition(pdPed, false)
                     RemoveAnimDict('mp_arrest_paired')
                     
-                    exports['wasabi-police']:handcuffed("easy")
+                    --exports['wasabi-police']:handcuffed("easy")
                     isCuffed = true
                     isBusy = false
                 else 
                     -- uncuff logic here
-                    exports['wasabi-police']:uncuffed()
+                    TaskTurnPedToFaceCoord(cache.ped, targetCoords.x, targetCoords.y, targetCoords.z, 2000)
+                    Wait(2000)
+                    TaskStartScenarioInPlace(cache.ped, 'PROP_HUMAN_PARKING_METER', 0, true)
+                    Wait(2000)
+                    ClearPedTasks(cache.ped)
+                    --exports['wasabi-police']:uncuffed()
                     isCuffed = false
                 end
             else 
@@ -242,7 +253,8 @@ AddEventHandler('jaga-gangmenu:search', function()
     
         if jobName == "mechanic" and jobDutyStatus == true then
             --get the vehicle entity
-            local target = QBCore.Functions.GetClosestPed
+            local coords = GetEntityCoords(PlayerPedId())
+            local target = QBCore.Functions.GetClosestPed(coords)
 
             if target then
                 searchPlayer(target)
@@ -276,10 +288,16 @@ AddEventHandler('jaga-gangmenu:schoonmaken', function()
                 -- send's the repairVehicle event, if the networkNetId is found. 
                 if vehicleNetId then
                     
-                    StartCleaningEmote()
-                    Citizen.Wait(schoonmakenDur)
-                    SetVehicleDirtLevel(veh, 0.0)
-                    
+                    --get the vehicle entity
+                    local coords = GetEntityCoords(PlayerPedId())
+                    local target = QBCore.Functions.GetClosestPed(coords)
+
+                    if target then
+                        searchPlayer(target)
+                    else 
+                        print("no player near you!")
+                    end
+
                 end
             end
         end
@@ -390,10 +408,10 @@ lib.registerMenu({
 }, function(selected, scrollIndex, args)
     --boeien
     if selected == 1 then
-        TriggerEvent('jaga-gangmenu:repareren')
+        TriggerEvent('jaga-gangmenu:cuff')
     --fouilleren
     elseif selected == 2 then 
-        TriggerEvent('jaga-gangmenu:schoonmaken')
+        TriggerEvent('jaga-gangmenu:fouilleren')
     --in auto steken
     elseif selected == 3 then 
         TriggerEvent('jaga-gangmenu:inbeslagNemen')
