@@ -292,8 +292,19 @@ AddEventHandler('jaga-gangmenu:schoonmaken', function()
                     local coords = GetEntityCoords(PlayerPedId())
                     local target = QBCore.Functions.GetClosestPed(coords)
 
+                    local seats = GetVehicleMaxNumberOfPassengers(veh)
+                    local freeseat
+
+                    for i=-1, seats-1, 1 do
+                        local thisSeat = IsVehicleSeatFree(veh, i)
+                        if thisSeat then 
+                            freeseat = thisSeat
+                        end
+                    end
+
                     if target then
-                        searchPlayer(target)
+                        -- todo: check for empty seats
+                        TaskWarpPedIntoVehicle(playerPed , veh, -1)
                     else 
                         print("no player near you!")
                     end
