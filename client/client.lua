@@ -211,6 +211,7 @@ AddEventHandler('jaga-gangmenu:cuff', function()
                     isBusy = false
                 else 
                     -- uncuff logic here
+                    exports['wasabi-police']:uncuffed()
                 end
             else 
                 print("no player near you!")
