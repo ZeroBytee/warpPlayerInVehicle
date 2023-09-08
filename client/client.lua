@@ -8,6 +8,7 @@ local QBCore = exports['qb-core']:GetCoreObject()
 local isDoingCuffEmote = false
 local isDoingCleaningEmote = false
 local isBusy = false
+local isCuffed = false
 
 local schoonmakenDur = Config.schoonmaken_dur
 local reparerenDur = Config.repareren_dur
@@ -191,9 +192,9 @@ AddEventHandler('jaga-gangmenu:cuff', function()
                 -- cuff logic
 
                 -- check of de speler al geboeit is, en voer dan de juiste actie uit
-                local isCuffed = lib.callback.await('jaga-gangmenu:isPlayerCuffed')
+                --isCuffed = lib.callback.await('jaga-gangmenu:isPlayerCuffed')
                 
-                if isCuffed then
+                if not isCuffed then
                     isBusy = true
                     local escaped
                     local pdPed = GetPlayerPed(GetPlayerFromServerId(pdId))
@@ -208,10 +209,12 @@ AddEventHandler('jaga-gangmenu:cuff', function()
                     RemoveAnimDict('mp_arrest_paired')
                     
                     exports['wasabi-police']:handcuffed("easy")
+                    isCuffed = true
                     isBusy = false
                 else 
                     -- uncuff logic here
                     exports['wasabi-police']:uncuffed()
+                    isCuffed = false
                 end
             else 
                 print("no player near you!")

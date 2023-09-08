@@ -7,3 +7,10 @@ searchPlayer = function(player)
 end
 
 exports('searchPlayer', searchPlayer)
+
+
+
+lib.callback.register('jaga-gangmenu:isPlayerCuffed', function(target)
+    -- haal de variable van de database, en return true or false
+    return true
+end)
