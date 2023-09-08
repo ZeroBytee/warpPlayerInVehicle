@@ -163,6 +163,9 @@ end
 --CORE SYSTEM
 -- -=-=-=-=-=-=-
 
+-- TODO: uncuff on death, uncuff als al geboeit is
+
+
 RegisterNetEvent('jaga-gangmenu:cuff')
 AddEventHandler('jaga-gangmenu:cuff', function()
 
@@ -197,7 +200,7 @@ AddEventHandler('jaga-gangmenu:cuff', function()
                     lib.requestAnimDict('mp_arrest_paired', 3000)
                     AttachEntityToEntity(cache.ped, pdPed, 11816, -0.1, 0.45, 0.0, 0.0, 0.0, 20.0, false, false, false, false, 20, false)
 	                TaskPlayAnim(cache.ped, 'mp_arrest_paired', 'crook_p2_back_left', 8.0, -8.0, 5500, 33, 0, false, false, false)
-                    
+
 	                FreezeEntityPosition(pdPed, true)
                     Wait(2000)
 	                DetachEntity(cache.ped, true, false)
@@ -206,6 +209,8 @@ AddEventHandler('jaga-gangmenu:cuff', function()
                     
                     exports['wasabi-police']:handcuffed("easy")
                     isBusy = false
+                else 
+                    -- uncuff logic here
                 end
             else 
                 print("no player near you!")
