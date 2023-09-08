@@ -200,30 +200,26 @@ AddEventHandler('jaga-gangmenu:cuff', function()
                 --isCuffed = lib.callback.await('jaga-gangmenu:isPlayerCuffed')
                 
                 if not isCuffed then
-                    print("cuffing started")
-                    isBusy = true
-                    local escaped
-                    local pdPed = GetPlayerPed(GetPlayerFromServerId(pdId))
-                    lib.requestAnimDict('mp_arrest_paired', 3000)
-                    AttachEntityToEntity(cache.ped, pdPed, 11816, -0.1, 0.45, 0.0, 0.0, 0.0, 20.0, false, false, false, false, 20, false)
-	                TaskPlayAnim(cache.ped, 'mp_arrest_paired', 'crook_p2_back_left', 8.0, -8.0, 5500, 33, 0, false, false, false)
-
-	                FreezeEntityPosition(pdPed, true)
-                    Wait(2000)
-	                DetachEntity(cache.ped, true, false)
-	                FreezeEntityPosition(pdPed, false)
-                    RemoveAnimDict('mp_arrest_paired')
-                    
+                    TriggerEvent('police:client:CuffPlayerSoft')
+                    --print("cuffing started")
+                    --isBusy = true
+                    --lib.requestAnimDict('mp_arrest_paired', 3000)
+                    --TaskPlayAnim(cache.ped, 'mp_arrest_paired', 'cop_p2_back_left', 8.0, -8.0, 3400, 33, 0, false, false, false)
+                    --Wait(3000)
+                    --isBusy = false
+                    --
                     --exports['wasabi-police']:handcuffed("easy")
                     isCuffed = true
-                    isBusy = false
+                    --isBusy = false
                 else 
+                    TriggerEvent('wasabi_police:uncuff')
                     -- uncuff logic here
-                    TaskTurnPedToFaceCoord(cache.ped, targetCoords.x, targetCoords.y, targetCoords.z, 2000)
-                    Wait(2000)
-                    TaskStartScenarioInPlace(cache.ped, 'PROP_HUMAN_PARKING_METER', 0, true)
-                    Wait(2000)
-                    ClearPedTasks(cache.ped)
+                    --local targetCoords = QBCore.Functions.GetCoords(target)
+                    --TaskTurnPedToFaceCoord(cache.ped, targetCoords.x, targetCoords.y, targetCoords.z, 2000)
+                    --Wait(2000)
+                    --TaskStartScenarioInPlace(cache.ped, 'PROP_HUMAN_PARKING_METER', 0, true)
+                    --Wait(2000)
+                    --ClearPedTasks(cache.ped)
                     --exports['wasabi-police']:uncuffed()
                     isCuffed = false
                 end
@@ -235,7 +231,7 @@ AddEventHandler('jaga-gangmenu:cuff', function()
 end)
 
 RegisterNetEvent('jaga-gangmenu:fouilleren')
-AddEventHandler('jaga-gangmenu:search', function()
+AddEventHandler('jaga-gangmenu:fouilleren', function()
 
     -- TODO: change job to gang when script is fully tested!!!
     -- TODO: change job to gang when script is fully tested!!!
@@ -245,6 +241,7 @@ AddEventHandler('jaga-gangmenu:search', function()
 
 
     --get the player
+    print("1")
     local player = QBCore.Functions.GetPlayerData()
     if player.job ~= nil and player.job.name ~= nil then
         local jobName = player.job.name
@@ -252,12 +249,14 @@ AddEventHandler('jaga-gangmenu:search', function()
         local jobDutyStatus = player.job.onduty
     
         if jobName == "mechanic" and jobDutyStatus == true then
+            print("2")
             --get the vehicle entity
             local coords = GetEntityCoords(PlayerPedId())
             local target = QBCore.Functions.GetClosestPed(coords)
 
             if target then
-                searchPlayer(target)
+                print("3")
+                TriggerServerEvent('inventory:server:OpenInventory', 'otherplayer', GetPlayerServerId(target))
             else 
                 print("no player near you!")
             end
@@ -266,8 +265,8 @@ AddEventHandler('jaga-gangmenu:search', function()
 end)
 
 
-RegisterNetEvent('jaga-gangmenu:schoonmaken')
-AddEventHandler('jaga-gangmenu:schoonmaken', function()
+RegisterNetEvent('jaga-gangmenu:inVoertuigSteken')
+AddEventHandler('jaga-gangmenu:inVoertuigSteken', function()
 
     --get the player
     local player = QBCore.Functions.GetPlayerData()
@@ -289,22 +288,28 @@ AddEventHandler('jaga-gangmenu:schoonmaken', function()
                 if vehicleNetId then
                     
                     --get the vehicle entity
-                    local coords = GetEntityCoords(PlayerPedId())
-                    local target = QBCore.Functions.GetClosestPed(coords)
 
                     local seats = GetVehicleMaxNumberOfPassengers(veh)
-                    local freeseat
+                    local seatToPutIn
 
                     for i=-1, seats-1, 1 do
                         local thisSeat = IsVehicleSeatFree(veh, i)
-                        if thisSeat then 
-                            freeseat = thisSeat
+                        if thisSeat and not seatToPutIn then
+                            seatToPutIn = thisSeat
                         end
                     end
 
-                    if target then
-                        -- todo: check for empty seats
-                        TaskWarpPedIntoVehicle(playerPed , veh, -1)
+
+                    local myPed = PlayerPedId()
+                    local newIgnoreList = {myPed}
+
+                    local coords = GetEntityCoords(myPed)
+                    local closestPlayer, distance = QBCore.Functions.GetClosestPed(coords, newIgnoreList)
+                    print("Player ID: " .. closestPlayer .. ", Distance: " .. distance .. " My player ped: " ..PlayerPedId()) -- Add this line for debugging
+
+                    if closestPlayer then
+                        print("warped " .. seatToPutIn)
+                        TaskWarpPedIntoVehicle(closestPlayer, veh, seatToPutIn)
                     else 
                         print("no player near you!")
                     end
@@ -419,13 +424,16 @@ lib.registerMenu({
 }, function(selected, scrollIndex, args)
     --boeien
     if selected == 1 then
+        print("cuff event")
         TriggerEvent('jaga-gangmenu:cuff')
     --fouilleren
     elseif selected == 2 then 
+        print("frisk event")
         TriggerEvent('jaga-gangmenu:fouilleren')
     --in auto steken
     elseif selected == 3 then 
-        TriggerEvent('jaga-gangmenu:inbeslagNemen')
+        print("car in event")
+        TriggerEvent('jaga-gangmenu:inVoertuigSteken')
     -- uit auto halen
     elseif selected == 4 then 
         TriggerEvent('jaga-gangmenu:kleedkamer', scrollIndex)
