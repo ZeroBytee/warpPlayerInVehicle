@@ -322,29 +322,19 @@ AddEventHandler('jaga-gangmenu:inVoertuigSteken', function()
 
                     local coords = GetEntityCoords(myPed)
                     --local closestPlayer, distance = QBCore.Functions.GetClosestPed(coords, newIgnoreList)
-                    local closestPlayerId, closestPlayer, closestPlayerCoords = lib.getClosestPlayer(coords, 4, false)
-                    --local closestPlayer = FindClosestPlayerID()
-
-                    --local targetPlayerId = PlayerId() -- Replace with the player ID you want to find the closest player to
-                    --local closestPlayer
-
-                    --QBCore.Functions.TriggerCallback('getClosestPlayer', function(closestPlayerId)
-                    --    if closestPlayerId then
-                    --        print("Closest player ID: " .. closestPlayerId)
-                    --        closestPlayer = closestPlayerId
-                    --    else
-                    --        print("No closest player found.")
-                    --    end
-                    --end, targetPlayerId)
-
-                    --local closestPlayerPed = GetPlayerPed(closestPlayer)
+                    --local closestPlayerId, closestPlayer, closestPlayerCoords = lib.getClosestPlayer(coords, 4, false)
                     
-                    print("Player ID: " .. closestPlayerId .. ", Distance: " .. closestPlayerCoords .. " My ped: "..PlayerPedId()) -- Add this line for debugging
+                    local targetPlayerId, distance = QBCore.Functions.GetClosestPlayer()
+                    local targetId
+                    if player ~= -1 and distance < 2.5 then
+                        targetId = GetPlayerServerId(targetPlayerId)
+                    end
+                    print("Player ID: " .. targetId .. ", ped: " .. targetPlayerId .. " My ped: "..PlayerPedId()) -- Add this line for debugging
 
 
 
-                    if closestPlayer then
-                        TriggerServerEvent('jaga-gangmenu:warpPed', closestPlayer, veh, seatToPutIn)
+                    if targetId then
+                        TriggerServerEvent('jaga-gangmenu:server:PutPlayerInVehicle', targetId)
                     else 
                         print("no player near you!")
                     end

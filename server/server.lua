@@ -79,3 +79,18 @@ QBCore.Functions.CreateCallback('getClosestPlayer', function(source, cb, targetP
 
     cb(closestPlayerId)
 end)
+
+
+RegisterNetEvent('jaga-gangmenu:server:PutPlayerInVehicle', function(playerId)
+    local src = source
+    local playerPed = GetPlayerPed(src)
+    local targetPed = GetPlayerPed(playerId)
+    local playerCoords = GetEntityCoords(playerPed)
+    local targetCoords = GetEntityCoords(targetPed)
+    if #(playerCoords - targetCoords) > 2.5 then return DropPlayer(src, "Attempted exploit abuse") end
+
+    local EscortPlayer = QBCore.Functions.GetPlayer(playerId)
+    if not QBCore.Functions.GetPlayer(src) or not EscortPlayer then return end
+
+    TriggerClientEvent("police:client:PutInVehicle", EscortPlayer.PlayerData.source)
+end)
