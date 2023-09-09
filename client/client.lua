@@ -325,18 +325,17 @@ AddEventHandler('jaga-gangmenu:inVoertuigSteken', function()
                     --local closestPlayerId, closestPlayer, closestPlayerCoords = lib.getClosestPlayer(coords, 4, false)
                     
                     local targetPlayerId, distance = QBCore.Functions.GetClosestPlayer()
-                    local targetId = PlayerId()
-                    --if player ~= -1 and distance < 3 then
-                    --    targetId = GetPlayerServerId(targetPlayerId)
-                    --end
-                    local test = GetPlayerPed(targetId)
-                    print("Player ID: " .. targetId .. ", ped: " .. test .. " My ped: "..PlayerPedId()) -- Add this line for debugging
+                    local targetId
+                    if player ~= -1 and distance < 3 then
+                        targetId = GetPlayerServerId(targetPlayerId)
+                    end
 
+                    print("Player ID: " .. targetId .. ", ped: " .. GetPlayerPed(targetId) .. " My ped: "..PlayerPedId()) -- Add this line for debugging
 
 
                     if targetId then
-                        TriggerServerEvent('jaga-gangmenu:server:PutPlayerInVehicle', test, veh, seatToPutIn)
-                        --TaskWarpPedIntoVehicle(test, veh, seatToPutIn)
+                        TriggerServerEvent('jaga-gangmenu:server:PutPlayerInVehicle', targetId, veh, seatToPutIn)
+                        --TaskWarpPedIntoVehicle(PlayerPedId(), veh, seatToPutIn+1)
                     else 
                         print("no player near you!")
                     end
@@ -348,15 +347,15 @@ AddEventHandler('jaga-gangmenu:inVoertuigSteken', function()
 end)
 
 RegisterNetEvent('jaga-gangmenu:client:inVoertuigGestoken')
-AddEventHandler('jaga-gangmenu:client:inVoertuigGestoken', function(playerPed, veh, seat)
+AddEventHandler('jaga-gangmenu:client:inVoertuigGestoken', function(veh, seat)
 
     print("groetjes van John Atlas")
 
-    TaskWarpPedIntoVehicle(playerPed, veh, seat)
+    TaskWarpPedIntoVehicle(PlayerPedId(), veh, seat)
 
 end)
 
-RegisterNetEvent('jaga-gangmenu:inbeslagNemen')
+RegisterNetEvent('jaga-gangmenu:uitVoertuigHalen')
 AddEventHandler('jaga-gangmenu:inbeslagNemen', function()
     --get the player
     local player = QBCore.Functions.GetPlayerData()

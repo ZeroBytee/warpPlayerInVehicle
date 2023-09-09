@@ -85,7 +85,7 @@ RegisterNetEvent('jaga-gangmenu:server:PutPlayerInVehicle', function(playerId, v
     local EscortPlayer = QBCore.Functions.GetPlayer(playerId)
     if not QBCore.Functions.GetPlayer(src) or not EscortPlayer then return end
     print("server sent1")
-    TriggerClientEvent("jaga-gangmenu:client:inVoertuigGestoken", playerId, targetPed, veh, freeSeat)
+    TriggerClientEvent("jaga-gangmenu:client:inVoertuigGestoken", playerId, veh, freeSeat)
     print("server sent2")
     
     --TaskWarpPedIntoVehicle(playerPed, veh, -1)
