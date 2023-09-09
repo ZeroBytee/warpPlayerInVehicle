@@ -66,51 +66,23 @@ function enableMovement()
 end
 
 
-function StartCuffEmote()
-    if not isDoingCuffEmote then
-        if not isDoingCleaningEmote then 
-            isDoingCuffEmote = true
-        
-            local playerPed = PlayerPedId()
-            local vehicle = getClosestVehicleFromPedPos(playerPed, 4, 3) -- Adjust the distance as needed
-            
-            if DoesEntityExist(vehicle) then
-                local playerCoords = GetEntityCoords(playerPed)
-                local vehicleCoords = GetEntityCoords(vehicle)
-                
-                local direction = vector3(vehicleCoords.x - playerCoords.x, vehicleCoords.y - playerCoords.y, 0.0)
-                local heading = math.atan2(direction.y, direction.x)
-                
-                SetEntityHeading(playerPed, math.deg(heading) - 90) -- Adjust the heading by 90 degrees
-                
-                -- Trigger the emote command
-                ExecuteCommand("e mechanic")
-                
-                Citizen.CreateThread(function()
-                    local duration = reparerenDur
-                    local startTime = GetGameTimer()
-                    
-                    while isDoingMechanicEmote do
-                        Citizen.Wait(0)
-    
-                        disableMovement()
-                        
-                        if GetGameTimer() - startTime >= duration then
-                            ClearPedTasks(playerPed)
-                            isDoingMechanicEmote = false
-                        end
-                    end
-    
-                    enableMovement()
-                    
-                end)
-            else
-                print("No vehicle found nearby.")
-            end
-        end
-        
+function PlayCuffAnimation(playerPed, targetPlayerPed)
+    RequestAnimDict("mp_arresting")
+    while not HasAnimDictLoaded("mp_arresting") do
+        Citizen.Wait(100)
     end
+
+    TaskPlayAnim(playerPed, "mp_arresting", "a_uncuff", 8.0, -8.0, -1, 16, 0, false, false, false)
+    TaskPlayAnim(targetPlayerPed, "mp_arresting", "a_uncuff", 8.0, -8.0, -1, 16, 0, false, false, false)
+    
+    Citizen.Wait(5000) -- Adjust the time as needed
+    
+    ClearPedTasks(playerPed)
+    ClearPedTasks(targetPlayerPed)
+
+    RemoveAnimDict("mp_arresting")
 end
+
 
 
 function StartCleaningEmote()
@@ -186,42 +158,30 @@ AddEventHandler('jaga-gangmenu:cuff', function()
     
         if jobName == "mechanic" and jobDutyStatus == true then
             --get the vehicle entity
+
+            local femaleHash = GetHashKey("mp_f_freemode_01")
+            local maleHash = GetHashKey("mp_m_freemode_01")
+
+            local myPed = PlayerPedId()
+            local newIgnoreList = {myPed}
+
             local coords = GetEntityCoords(PlayerPedId())
-            local closestPed, distance = QBCore.Functions.GetClosestPed(coords)
-            local target
+            local closestPed, distance = QBCore.Functions.GetClosestPed(coords, newIgnoreList)
+            local targetPed
             if distance <= 5 then
-                target = closestPed
+                targetPed = closestPed
             end
 
-            if target then
-                -- cuff logic
+            if targetPed then
+                print("targetped " ..targetPed)
 
-                -- check of de speler al geboeit is, en voer dan de juiste actie uit
-                --isCuffed = lib.callback.await('jaga-gangmenu:isPlayerCuffed')
-                
-                if not isCuffed then
-                    TriggerEvent('police:client:CuffPlayerSoft')
-                    --print("cuffing started")
-                    --isBusy = true
-                    --lib.requestAnimDict('mp_arrest_paired', 3000)
-                    --TaskPlayAnim(cache.ped, 'mp_arrest_paired', 'cop_p2_back_left', 8.0, -8.0, 3400, 33, 0, false, false, false)
-                    --Wait(3000)
-                    --isBusy = false
-                    --
-                    --exports['wasabi-police']:handcuffed("easy")
-                    isCuffed = true
-                    --isBusy = false
-                else 
-                    TriggerEvent('wasabi_police:uncuff')
-                    -- uncuff logic here
-                    --local targetCoords = QBCore.Functions.GetCoords(target)
-                    --TaskTurnPedToFaceCoord(cache.ped, targetCoords.x, targetCoords.y, targetCoords.z, 2000)
-                    --Wait(2000)
-                    --TaskStartScenarioInPlace(cache.ped, 'PROP_HUMAN_PARKING_METER', 0, true)
-                    --Wait(2000)
-                    --ClearPedTasks(cache.ped)
-                    --exports['wasabi-police']:uncuffed()
-                    isCuffed = false
+
+                --local dict = "mp_arresting"
+                --local anim = "idle" -- a_arrest_on_floor
+                --local flags = 49
+
+                TriggerServerEvent('jaga-gangmenu:cuffPlayer', ped, targetPed)
+                    
                 end
             else 
                 print("no player near you!")
@@ -343,58 +303,111 @@ AddEventHandler('jaga-gangmenu:inbeslagNemen', function()
 end)
 
 
-local originalPedVariation = nil
-local originalPedTexture = nil
-local vabClothesOn = false
 
-
-RegisterNetEvent('jaga-gangmenu:kleedkamer')
-AddEventHandler('jaga-gangmenu:kleedkamer', function(scrollIndex)
-    --get the player
-    local player = QBCore.Functions.GetPlayerData()
-    if player.job ~= nil and player.job.name ~= nil then
-        local jobName = player.job.name
-        local jobDutyStatus = player.job.onduty
-        local jobGrade = player.job.grade.name
-
-
-
-        if jobName == "mechanic" and jobDutyStatus == true then
-            local playerPed = GetPlayerPed(-1)
-
-            if vabClothesOn == false then 
-                originalPedVariation = GetPedDrawableVariation(playerPed, 11)
-                originalPedTexture = GetPedTextureVariation(playerPed, 11)
+Citizen.CreateThread(function()
+    while true do
+        -- This doesn't have to be run every frame, so a 500ms delay is good enough.
+        Citizen.Wait(500)
+        
+        -- If changed is false (the status hasn't been changed recently) check if the
+        -- ped is currently cuffed. If so, check if the player is NOT playing the animation
+        -- if it is NOT playing it, and it should be (according to the cuffed state variable)
+        -- Wait 500ms and play the animation again.
+        if not changed then
+            -- Resetting the ped to the current player ped again (buggy shit be buggy)
+            ped = PlayerPedId()
+            
+            -- Check if the player is cuffed according to the native IsPlayerCuffed()
+            -- Which returns true if you ran SetEnableHandcuffs(ped, true).
+            -- Returns false if that function hasn't been called or if the UncuffPed()
+            -- function was called (or SetEnableHandcuffs(ped, false)).
+            
+            
+            if isCuffed and not IsEntityPlayingAnim(ped, dict, anim, 3) then
+                
+                -- Wait 500ms before playing/setting the cuffed animation again.
+                Citizen.Wait(500)
+                TaskPlayAnim(ped, dict, anim, 8.0, -8, -1, flags, 0, 0, 0, 0)
             end
-            if scrollIndex == 1 then
-                SetPedComponentVariation(playerPed, 11, originalPedVariation, originalPedTexture, 0)
-            else 
-                if jobGrade == "Novice" then  
-                    SetPedComponentVariation(playerPed, 11, 1, 0, 0)
-                    vabClothesOn = true
-                elseif jobGrade == "Experienced" then  
-                    SetPedComponentVariation(playerPed, 11, 9, 0, 0)
-                    vabClothesOn = true
-                elseif jobGrade == "Advanced" then  
-                    SetPedComponentVariation(playerPed, 11, 13, 0, 0)
-                    vabClothesOn = true
-                elseif jobGrade == "CEO" then
-                    SetPedComponentVariation(playerPed, 11, 13, 1, 0) -- monteur clothes, change
-                    vabClothesOn = true
-                end
+        
+        -- If the player's cuff state has been changed in the past 500ms then don't run the code above,
+        -- instead set the changed value to false, and continue the loop. This will add another 500ms
+        -- before this check is ran again to make sure that the cuff animation has time to start.
+        -- If we didn't do this, the player would glitch out a lot because the animation never had time
+        -- to start 100% before being re-tasked to re-start the animation.
+        else
+            changed = false
+        end
+    end
+end)
+
+-- Create another loop, this one has to be ran every tick.
+Citizen.CreateThread(function()
+    while true do
+        
+        -- Wait 0ms, makes the loop run every tick.
+        Citizen.Wait(0)
+        
+        -- (Re)set the ped _AGAIN_!
+        ped = PlayerPedId()
+        
+        -- If the player is currently cuffed....
+        if isCuffed then
+            
+            -- ...don't allow them to do one of the following actions by
+            -- disabling all of those buttons on controller/keyboard+mouse.
+            -- We don't want them to be able to use any type of attack,
+            -- obviously you can't pull out your rocket launcher if you're cuffed.....
+            DisableControlAction(0, 69, true) -- INPUT_VEH_ATTACK
+            DisableControlAction(0, 92, true) -- INPUT_VEH_PASSENGER_ATTACK
+            DisableControlAction(0, 114, true) -- INPUT_VEH_FLY_ATTACK
+            DisableControlAction(0, 140, true) -- INPUT_MELEE_ATTACK_LIGHT
+            DisableControlAction(0, 141, true) -- INPUT_MELEE_ATTACK_HEAVY
+            DisableControlAction(0, 142, true) -- INPUT_MELEE_ATTACK_ALTERNATE
+            DisableControlAction(0, 257, true) -- INPUT_ATTACK2
+            DisableControlAction(0, 263, true) -- INPUT_MELEE_ATTACK1
+            DisableControlAction(0, 264, true) -- INPUT_MELEE_ATTACK2
+            DisableControlAction(0, 24, true) -- INPUT_ATTACK
+            DisableControlAction(0, 25, true) -- INPUT_AIM
+            
+            -- If the ped had any weapon in their hands before being cuffed, they will drop
+            -- the weapon (ammo will fall on the ground, not the actual gun. However the gun
+            -- will be removed from their inventory.)
+            SetPedDropsWeapon(ped)
+            
+            -- Get the vehicle the player is currently in (if in any)
+            local veh = GetVehiclePedIsIn(ped, false) 
+            
+            -- If the vehicle exists and it's still drivable, and the player is in the drivers seat, we want
+            -- to disable steering. As you obviously can't steer a car when your hands are tied behind your back.
+            -- We'll also notify te user by showing a notification without the 'bleep' sound.
+            -- In case the animation is broken for whatever reason, the notification will make sure they know
+            -- why they can't steer the vehicle.
+            if DoesEntityExist(veh) and not IsEntityDead(veh) and GetPedInVehicleSeat(veh, -1) == ped then
+                
+                -- Disable A/D on keyboard & Joystick Left/Right on controller.
+                DisableControlAction(0, 59, true)
+                DisableControlAction(0, 60, true)
+                DisableControlAction(0, 61, true)
+                DisableControlAction(0, 62, true)
+                DisableControlAction(0, 63, true)
+                DisableControlAction(0, 64, true)
+
+                -- Show the notification, turning off the notification sound.
+                ShowHelp("Your hands are ~r~cuffed~s~, you can't stear!", false)
             end
         end
     end
 end)
 
 
-
--- TODO: 
--- create mysql connection and save the player's outfit there
--- only save the outfit of the people that put on vab clothing
-
-
-
+-- Show a help message (top left corner).
+-- This is a simplefied version. Input text length is limited.
+function ShowHelp(text, bleep)
+    BeginTextCommandDisplayHelp("STRING")
+    AddTextComponentSubstringPlayerName(text)
+    EndTextCommandDisplayHelp(0, false, bleep, -1)
+end
 
 
 -- -=-=-=-=-=-=-
