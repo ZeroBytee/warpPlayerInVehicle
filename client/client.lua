@@ -326,6 +326,7 @@ AddEventHandler('jaga-gangmenu:inVoertuigSteken', function()
                     
                     local targetPlayerId, distance = QBCore.Functions.GetClosestPlayer()
                     local targetId
+                    targetId = GetPlayerServerId(targetPlayerId) --REMOVE AFTER TESTING
                     if player ~= -1 and distance < 3 then
                         targetId = GetPlayerServerId(targetPlayerId)
                     end
