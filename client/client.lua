@@ -98,75 +98,12 @@ end
 
 
 
-function StartCleaningEmote()
-    if not isDoingCleaningEmote then
-        if not isDoingMechanicEmote then
-            isDoingCleaningEmote = true
-        
-            local playerPed = PlayerPedId()
-            local vehicle = getClosestVehicleFromPedPos(playerPed, 4, 3) -- Adjust the distance as needed
-            
-            if DoesEntityExist(vehicle) then
-                local playerCoords = GetEntityCoords(playerPed)
-                local vehicleCoords = GetEntityCoords(vehicle)
-                
-                local direction = vector3(vehicleCoords.x - playerCoords.x, vehicleCoords.y - playerCoords.y, 0.0)
-                local heading = math.atan2(direction.y, direction.x)
-                
-                SetEntityHeading(playerPed, math.deg(heading) - 90) -- Adjust the heading by 90 degrees
-                
-                -- Trigger the emote command
-                ExecuteCommand("e clean")
-                
-                Citizen.CreateThread(function()
-                    local duration = schoonmakenDur
-                    local startTime = GetGameTimer()
-                    
-                    while isDoingCleaningEmote do
-                        Citizen.Wait(0)
-                        
-                        disableMovement()
-
-                        if GetGameTimer() - startTime >= duration then
-                            ClearPedTasks(playerPed)
-                            isDoingCleaningEmote = false
-                        end
-                    end
-
-                    enableMovement()
-
-                end)
-            else
-                print("No vehicle found nearby.")
-            end
-        end
-    end
-end
-
-function FindClosestPlayerID(targetPlayer)
-    local closestPlayerID = -1  -- Initialize with an invalid player ID
-    local closestDistance = -1  -- Initialize with an invalid distance value
-
-    for _, player in pairs(QBCore.Functions.GetPlayers()) do
-        if player ~= targetPlayer then
-            local targetCoords = GetEntityCoords(targetPlayer)
-            local playerCoords = GetEntityCoords(player)
-            local distance = #(targetCoords - playerCoords)
-
-            if closestDistance == -1 or distance < closestDistance then
-                closestDistance = distance
-                closestPlayerID = GetPlayerServerId(player)
-            end
-        end
-    end
-
-    return closestPlayerID
-end
-
-
-
 -- -=-=-=-=-=-=-
 --CORE SYSTEM
+-- -=-=-=-=-=-=-
+
+-- -=-=-=-=-=-=-
+-- EVENTS
 -- -=-=-=-=-=-=-
 
 -- TODO: uncuff on death, uncuff als al geboeit is
@@ -365,6 +302,14 @@ AddEventHandler('jaga-gangmenu:client:inVoertuigGestoken', function(veh, seat)
 
 end)
 
+RegisterNetEvent('jaga-gangmenu:client:uitVoertuigGehaald')
+AddEventHandler('jaga-gangmenu:client:inVoertuigGestoken', function(veh, seat)
+
+    -- logic here
+
+
+end)
+
 RegisterNetEvent('jaga-gangmenu:uitVoertuigHalen')
 AddEventHandler('jaga-gangmenu:inbeslagNemen', function()
     --get the player
@@ -425,6 +370,13 @@ Citizen.CreateThread(function()
         end
     end
 end)
+
+
+
+
+-- -=-=-=-=-=-=-
+--    LOOPS
+-- -=-=-=-=-=-=-
 
 -- Create another loop, this one has to be ran every tick.
 Citizen.CreateThread(function()
