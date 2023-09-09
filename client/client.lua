@@ -325,7 +325,7 @@ AddEventHandler('jaga-gangmenu:inVoertuigSteken', function()
                     --local closestPlayerId, closestPlayer, closestPlayerCoords = lib.getClosestPlayer(coords, 4, false)
                     
                     local targetPlayerId, distance = QBCore.Functions.GetClosestPlayer()
-                    local targetId
+                    local targetId = -10
                     --targetId = GetPlayerServerId(PlayerId()) --REMOVE AFTER TESTING
                     if player ~= -1 and distance < 3 then
                         targetId = GetPlayerServerId(targetPlayerId)
@@ -334,7 +334,7 @@ AddEventHandler('jaga-gangmenu:inVoertuigSteken', function()
                     print("Player ID: " .. targetId .. ", ped: " .. GetPlayerPed(targetId) .. " My ped: "..PlayerPedId().. " veh: " ..veh) -- Add this line for debugging
 
 
-                    if targetId then
+                    if targetId ~= -10 then
                         TriggerServerEvent('jaga-gangmenu:server:PutPlayerInVehicle', targetId, veh, seatToPutIn)
                         --TaskWarpPedIntoVehicle(PlayerPedId(), veh, seatToPutIn+1)
                     else 
