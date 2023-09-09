@@ -10,6 +10,9 @@ local isDoingCleaningEmote = false
 local isBusy = false
 local isCuffed = false
 
+local dict = "mp_arresting"
+local anim = "idle"
+
 local schoonmakenDur = Config.schoonmaken_dur
 local reparerenDur = Config.repareren_dur
 
@@ -130,6 +133,26 @@ function StartCleaningEmote()
     end
 end
 
+function FindClosestPlayerID(targetPlayer)
+    local closestPlayerID = -1  -- Initialize with an invalid player ID
+    local closestDistance = -1  -- Initialize with an invalid distance value
+
+    for _, player in pairs(QBCore.Functions.GetPlayers()) do
+        if player ~= targetPlayer then
+            local targetCoords = GetEntityCoords(targetPlayer)
+            local playerCoords = GetEntityCoords(player)
+            local distance = #(targetCoords - playerCoords)
+
+            if closestDistance == -1 or distance < closestDistance then
+                closestDistance = distance
+                closestPlayerID = GetPlayerServerId(player)
+            end
+        end
+    end
+
+    return closestPlayerID
+end
+
 
 
 -- -=-=-=-=-=-=-
@@ -164,8 +187,8 @@ AddEventHandler('jaga-gangmenu:cuff', function()
 
             local dictPlayer = "mp_arresting"
             local dictTarget = "mp_arrest_paired"
-            local animPlayer = "idle" -- a_arrest_on_floor
             local animTarget = "idle" -- a_arrest_on_floor
+            local animPlayer = "idle"
             local flags = 49
 
             local playerPed = PlayerPedId()
@@ -188,12 +211,15 @@ AddEventHandler('jaga-gangmenu:cuff', function()
                 end)
 
                 if not isCuffed then 
+                    print("cuffing")
                     -- cuff logic
-                    TaskPlayAnim(playerPed, dictPlayer, 'a_arrest_on_floor', 8.0, -8, -1, flags, 0, 0, 0, 0)
-                    TaskPlayAnim(targetPed, dictTarget, 'crook_p1_back', 8.0, -8, -1, flags, 0, 0, 0, 0)
-                      
-                    Citizen.Wait(4000)
-                    ClearPedTasks(playerPed)
+
+                    TaskPlayAnim(targetPed, dict, anim, 8.0, -8, -1, flags, 0, 0, 0, 0)
+
+                    --TaskPlayAnim(playerPed, dictPlayer, 'a_arrest_on_floor', 8.0, -8, -1, flags, 0, 0, 0, 0)
+                    --TaskPlayAnim(targetPed, dictTarget, 'crook_p1_back', 8.0, -8, -1, flags, 0, 0, 0, 0)
+                    
+
                     -- voegt de boeien toe aan speler
                     if GetEntityModel(targetPed) == femaleHash then -- mp female
                         prevFemaleVariation = GetPedDrawableVariation(targetPed, 7)
@@ -206,9 +232,10 @@ AddEventHandler('jaga-gangmenu:cuff', function()
                     end
                      --zorgt dat je geen wapen meer kan pakken
                      --Enable the handcuffed animation using the ped, dict, anim and flags variables (defined above).
-                    TaskPlayAnim(targetPed, dict, anim, 8.0, -8, -1, flags, 0, 0, 0, 0)
+                    
                 else
                     -- uncuff logic
+                    ClearPedTasks(playerPed)
                 end
 
                 TriggerServerEvent('jaga-gangmenu:cuffPlayer', ped, targetPed)
@@ -280,12 +307,12 @@ AddEventHandler('jaga-gangmenu:inVoertuigSteken', function()
                     --get the vehicle entity
 
                     local seats = GetVehicleMaxNumberOfPassengers(veh)
-                    local seatToPutIn
-
-                    for i=-1, seats-1, 1 do
-                        local thisSeat = IsVehicleSeatFree(veh, i)
-                        if thisSeat and not seatToPutIn then
-                            seatToPutIn = thisSeat
+                    local seatToPutIn = -1  -- Start with an invalid seat index
+                
+                    for i = -1, seats - 1 do
+                        if IsVehicleSeatFree(veh, i) then
+                            seatToPutIn = i  -- Set the seat index to the first available seat
+                            break
                         end
                     end
 
@@ -294,12 +321,30 @@ AddEventHandler('jaga-gangmenu:inVoertuigSteken', function()
                     local newIgnoreList = {myPed}
 
                     local coords = GetEntityCoords(myPed)
-                    local closestPlayer, distance = QBCore.Functions.GetClosestPed(coords, newIgnoreList)
-                    print("Player ID: " .. closestPlayer .. ", Distance: " .. distance .. " My player ped: " ..PlayerPedId()) -- Add this line for debugging
+                    --local closestPlayer, distance = QBCore.Functions.GetClosestPed(coords, newIgnoreList)
+                    local closestPlayerId, closestPlayer, closestPlayerCoords = lib.getClosestPlayer(coords, 4, false)
+                    --local closestPlayer = FindClosestPlayerID()
+
+                    --local targetPlayerId = PlayerId() -- Replace with the player ID you want to find the closest player to
+                    --local closestPlayer
+
+                    --QBCore.Functions.TriggerCallback('getClosestPlayer', function(closestPlayerId)
+                    --    if closestPlayerId then
+                    --        print("Closest player ID: " .. closestPlayerId)
+                    --        closestPlayer = closestPlayerId
+                    --    else
+                    --        print("No closest player found.")
+                    --    end
+                    --end, targetPlayerId)
+
+                    --local closestPlayerPed = GetPlayerPed(closestPlayer)
+                    
+                    print("Player ID: " .. closestPlayerId .. ", Distance: " .. closestPlayerCoords .. " My ped: "..PlayerPedId()) -- Add this line for debugging
+
+
 
                     if closestPlayer then
-                        print("warped " .. seatToPutIn)
-                        TaskWarpPedIntoVehicle(closestPlayer, veh, seatToPutIn)
+                        TriggerServerEvent('jaga-gangmenu:warpPed', closestPlayer, veh, seatToPutIn)
                     else 
                         print("no player near you!")
                     end
