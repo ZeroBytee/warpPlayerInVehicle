@@ -162,8 +162,14 @@ AddEventHandler('jaga-gangmenu:cuff', function()
             local femaleHash = GetHashKey("mp_f_freemode_01")
             local maleHash = GetHashKey("mp_m_freemode_01")
 
-            local myPed = PlayerPedId()
-            local newIgnoreList = {myPed}
+            local dictPlayer = "mp_arresting"
+            local dictTarget = "mp_arrest_paired"
+            local animPlayer = "idle" -- a_arrest_on_floor
+            local animTarget = "idle" -- a_arrest_on_floor
+            local flags = 49
+
+            local playerPed = PlayerPedId()
+            local newIgnoreList = {playerPed}
 
             local coords = GetEntityCoords(PlayerPedId())
             local closestPed, distance = QBCore.Functions.GetClosestPed(coords, newIgnoreList)
@@ -176,13 +182,37 @@ AddEventHandler('jaga-gangmenu:cuff', function()
                 print("targetped " ..targetPed)
 
 
-                --local dict = "mp_arresting"
-                --local anim = "idle" -- a_arrest_on_floor
-                --local flags = 49
+                lib.callback('jaga-gangmenu:isPlayerCuffed', false, function(isTargetCuffed)
+                    print(isTargetCuffed)
+                    isCuffed = isTargetCuffed
+                end)
+
+                if not isCuffed then 
+                    -- cuff logic
+                    TaskPlayAnim(playerPed, dictPlayer, 'a_arrest_on_floor', 8.0, -8, -1, flags, 0, 0, 0, 0)
+                    TaskPlayAnim(targetPed, dictTarget, 'crook_p1_back', 8.0, -8, -1, flags, 0, 0, 0, 0)
+                      
+                    Citizen.Wait(4000)
+                    ClearPedTasks(playerPed)
+                    -- voegt de boeien toe aan speler
+                    if GetEntityModel(targetPed) == femaleHash then -- mp female
+                        prevFemaleVariation = GetPedDrawableVariation(targetPed, 7)
+                        SetPedComponentVariation(targetPed, 7, 25, 0, 0)
+                    
+                    -- If it's the male MP model, do the same thing as above, but for the Male ped instead.
+                    elseif GetEntityModel(targetPed) == maleHash then -- mp male
+                        prevMaleVariation = GetPedDrawableVariation(targetPed, 7)
+                        SetPedComponentVariation(targetPed, 7, 41, 0, 0)
+                    end
+                     --zorgt dat je geen wapen meer kan pakken
+                     --Enable the handcuffed animation using the ped, dict, anim and flags variables (defined above).
+                    TaskPlayAnim(targetPed, dict, anim, 8.0, -8, -1, flags, 0, 0, 0, 0)
+                else
+                    -- uncuff logic
+                end
 
                 TriggerServerEvent('jaga-gangmenu:cuffPlayer', ped, targetPed)
                     
-                end
             else 
                 print("no player near you!")
             end
