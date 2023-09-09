@@ -4,6 +4,16 @@ local QBCore = exports['qb-core']:GetCoreObject()
 -- GLOBAL FUNCTIONS
 -- -=-=-=-=-=-=-
 
+
+--TODO cuff
+-- client cuff animation functions
+-- client sends to server who needs to be cuffed and who is cuffing the player
+-- server sends back the cuff animation event to the 2 clients
+-- clients display animation and cuff player
+-- client blocks movement etc
+
+
+
 -- LOCAL VARIABLES
 local isDoingCuffEmote = false
 local isDoingCleaningEmote = false
