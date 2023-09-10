@@ -314,7 +314,7 @@ AddEventHandler('jaga-gangmenu:uitVoertuigHalen', function()
     
         if jobName == "mechanic" and jobDutyStatus == true then
             --get the vehicle entity
-            local veh = GetVehiclePedIsIn(PlayerPedId(), false) -- Get the vehicle the player is in
+            local veh = getClosestVehicleFromPedPos(PlayerPedId(), 4, 3)
 
             -- check's if vehicle exist
             if DoesEntityExist(veh) and IsEntityAVehicle(veh) then
