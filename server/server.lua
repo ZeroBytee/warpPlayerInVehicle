@@ -14,9 +14,37 @@ local function IsPlayerCuffed(playerPedId)
 end
 
 
+RegisterNetEvent('jaga-gangmenu:server:PutPlayerInVehicle', function(playerId, veh, freeSeat)
+    local src = source
+    local playerPed = GetPlayerPed(src)
+    local targetPed = GetPlayerPed(playerId)
+    local playerCoords = GetEntityCoords(playerPed)
+    local targetCoords = GetEntityCoords(targetPed)
+    if #(playerCoords - targetCoords) > 3 then return DropPlayer(src, "Attempted exploit abuse") end
 
-RegisterNetEvent('jaga-gangmenu:cuffPlayer')
-AddEventHandler('jaga-gangmenu:cuffPlayer', function(playerPed, targetPed)
+    --local EscortPlayer = QBCore.Functions.GetPlayer(playerId)
+    if not QBCore.Functions.GetPlayer(src) then return end
+    TriggerClientEvent("jaga-gangmenu:client:inVoertuigGestoken", playerId, veh, freeSeat)
+    
+    --TaskWarpPedIntoVehicle(playerPed, veh, -1)
+end)
+
+RegisterNetEvent('jaga-gangmenu:server:TakePlayerOutOfVehicle', function(playerId, veh)
+    local src = source
+    local playerPed = GetPlayerPed(src)
+    local targetPed = GetPlayerPed(playerId)
+    local playerCoords = GetEntityCoords(playerPed)
+    local targetCoords = GetEntityCoords(targetPed)
+    if #(playerCoords - targetCoords) > 3 then return DropPlayer(src, "Attempted exploit abuse") end
+
+    --local EscortPlayer = QBCore.Functions.GetPlayer(playerId)
+    if not QBCore.Functions.GetPlayer(src) then return end
+    TriggerClientEvent("jaga-gangmenu:client:uitVoertuigGehaald", playerId, veh)
+    
+    --TaskWarpPedIntoVehicle(playerPed, veh, -1)
+end)
+
+RegisterNetEvent('jaga-gangmenu:server:cuffPlayer', function(targetId)
 
     local dictPlayer = "mp_arresting"
     local dictTarget = "mp_arrest_paired"
@@ -40,66 +68,44 @@ AddEventHandler('jaga-gangmenu:cuffPlayer', function(playerPed, targetPed)
         print(IsPlayerCuffed(targetPed))
     end
 
+    local src = source
+    local playerPed = GetPlayerPed(src)
+    local targetPed = GetPlayerPed(playerId)
+    local playerCoords = GetEntityCoords(playerPed)
+    local targetCoords = GetEntityCoords(targetPed)
+    if #(playerCoords - targetCoords) > 3 then return DropPlayer(src, "Attempted exploit abuse") end
+
+    --local EscortPlayer = QBCore.Functions.GetPlayer(playerId)
+    if not QBCore.Functions.GetPlayer(src) then return end
+    TriggerClientEvent("jaga-gangmenu:client:uitVoertuigGehaald", targetId)
+    
+    --TaskWarpPedIntoVehicle(playerPed, veh, -1)
 end)
 
-QBCore.Functions.CreateCallback('getClosestPlayer', function(source, cb, targetPlayerId)
-    local sourcePlayer = QBCore.Functions.GetPlayer(source)
-    local targetPlayer = QBCore.Functions.GetPlayer(targetPlayerId)
+RegisterNetEvent('police:server:CuffPlayer', function(position, id, item)
+    local src = source
+    local playerPed = GetPlayerPed(src)
+    local targetPed = GetPlayerPed(id)
+    local playerCoords = GetEntityCoords(playerPed)
+    local targetCoords = GetEntityCoords(targetPed)
+    if #(playerCoords - targetCoords) > 2.5 then DropPlayer(src, "Attempted exploit abuse") end
 
-    if not sourcePlayer or not targetPlayer then
-        cb(nil)
-        return
-    end
+    local Player = QBCore.Functions.GetPlayer(src)
+    local CuffedPlayer = QBCore.Functions.GetPlayer(id)
+    if not Player or not CuffedPlayer or not Player.Functions.GetItemByName(item) then return end
+    TriggerClientEvent('police:client:GetCuffed', CuffedPlayer.PlayerData.source, Player.PlayerData.source, position, item)
+end)
 
-    local sourceCoords = sourcePlayer.PlayerData.coords
-    local targetCoords = targetPlayer.PlayerData.coords
-
-    local closestPlayerId = nil
-    local closestDistance = nil
-
-    for playerId, player in pairs(QBCore.Functions.GetPlayers()) do
-        if playerId ~= source and playerId ~= targetPlayerId then
-            local playerCoords = player.PlayerData.coords
-            local distance = #(sourceCoords - playerCoords)
-            print("Player ID: " .. playerId .. " - Distance: " .. distance)
-
-            if closestDistance == nil or distance < closestDistance then
-                closestPlayerId = playerId
-                closestDistance = distance
-            end
+RegisterNetEvent('police:server:SetHandcuffStatus', function(isHandcuffed, cuffitem, position)
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+    local citizenid = Player.PlayerData.citizenid
+    if Player then
+        Player.Functions.SetMetaData("ishandcuffed", isHandcuffed)
+        if isHandcuffed then
+            playerCuffStatus[citizenid] = {cuffed = true, item = cuffitem, pos = position}
+        else
+            playerCuffStatus[citizenid] = nil
         end
     end
-
-    cb(closestPlayerId)
-end)
-
-
-RegisterNetEvent('jaga-gangmenu:server:PutPlayerInVehicle', function(playerId, veh, freeSeat)
-    local src = source
-    local playerPed = GetPlayerPed(src)
-    local targetPed = GetPlayerPed(playerId)
-    local playerCoords = GetEntityCoords(playerPed)
-    local targetCoords = GetEntityCoords(targetPed)
-    if #(playerCoords - targetCoords) > 2.5 then return DropPlayer(src, "Attempted exploit abuse") end
-
-    --local EscortPlayer = QBCore.Functions.GetPlayer(playerId)
-    if not QBCore.Functions.GetPlayer(src) then return end
-    TriggerClientEvent("jaga-gangmenu:client:inVoertuigGestoken", playerId, veh, freeSeat)
-    
-    --TaskWarpPedIntoVehicle(playerPed, veh, -1)
-end)
-
-RegisterNetEvent('jaga-gangmenu:server:TakePlayerOutOfVehicle', function(playerId, veh)
-    local src = source
-    local playerPed = GetPlayerPed(src)
-    local targetPed = GetPlayerPed(playerId)
-    local playerCoords = GetEntityCoords(playerPed)
-    local targetCoords = GetEntityCoords(targetPed)
-    if #(playerCoords - targetCoords) > 2.5 then return DropPlayer(src, "Attempted exploit abuse") end
-
-    --local EscortPlayer = QBCore.Functions.GetPlayer(playerId)
-    if not QBCore.Functions.GetPlayer(src) then return end
-    TriggerClientEvent("jaga-gangmenu:client:uitVoertuigGehaald", playerId, veh)
-    
-    --TaskWarpPedIntoVehicle(playerPed, veh, -1)
 end)

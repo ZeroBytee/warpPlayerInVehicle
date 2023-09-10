@@ -18,7 +18,7 @@ local QBCore = exports['qb-core']:GetCoreObject()
 local isDoingCuffEmote = false
 local isDoingCleaningEmote = false
 local isBusy = false
-local isCuffed = false
+local isHandCuffed = false
 
 local dict = "mp_arresting"
 local anim = "idle"
@@ -150,48 +150,77 @@ AddEventHandler('jaga-gangmenu:cuff', function()
 
             if targetPed then
                 print("targetped " ..targetPed)
+                
 
-
-                lib.callback('jaga-gangmenu:isPlayerCuffed', false, function(isTargetCuffed)
-                    print(isTargetCuffed)
-                    isCuffed = isTargetCuffed
-                end)
-
-                if not isCuffed then 
-                    print("cuffing")
-                    -- cuff logic
-
-                    TaskPlayAnim(targetPed, dict, anim, 8.0, -8, -1, flags, 0, 0, 0, 0)
-
-                    --TaskPlayAnim(playerPed, dictPlayer, 'a_arrest_on_floor', 8.0, -8, -1, flags, 0, 0, 0, 0)
-                    --TaskPlayAnim(targetPed, dictTarget, 'crook_p1_back', 8.0, -8, -1, flags, 0, 0, 0, 0)
-                    
-
-                    -- voegt de boeien toe aan speler
-                    if GetEntityModel(targetPed) == femaleHash then -- mp female
-                        prevFemaleVariation = GetPedDrawableVariation(targetPed, 7)
-                        SetPedComponentVariation(targetPed, 7, 25, 0, 0)
-                    
-                    -- If it's the male MP model, do the same thing as above, but for the Male ped instead.
-                    elseif GetEntityModel(targetPed) == maleHash then -- mp male
-                        prevMaleVariation = GetPedDrawableVariation(targetPed, 7)
-                        SetPedComponentVariation(targetPed, 7, 41, 0, 0)
-                    end
-                     --zorgt dat je geen wapen meer kan pakken
-                     --Enable the handcuffed animation using the ped, dict, anim and flags variables (defined above).
-                    
-                else
-                    -- uncuff logic
-                    ClearPedTasks(playerPed)
-                end
-
-                TriggerServerEvent('jaga-gangmenu:cuffPlayer', ped, targetPed)
+                TriggerServerEvent('jaga-gangmenu:server:cuffPlayer', ped, targetPed)
                     
             else 
                 print("no player near you!")
             end
         end
     end
+end)
+
+local function CuffAnim(dict, anim)
+    loadAnimDict(dict)
+    TaskPlayAnim(PlayerPedId(), dict, anim, 8.0, -8, -1, 49, 0, false, false, false)
+    Wait(2000)
+    ClearPedTasks(PlayerPedId())
+end
+
+RegisterNetEvent('police:client:CuffPlayer', function(item)
+    if not IsPedRagdoll(PlayerPedId()) then
+        local player, distance = QBCore.Functions.GetClosestPlayer()
+        if player ~= -1 and distance <= 2.5 then
+            TaskTurnPedToFaceEntity(PlayerPedId(), GetPlayerPed(player),1000)
+                local facing = IsPedFacingPed(GetPlayerPed(player), PlayerPedId(),60.0)
+                if facing then
+
+                    TriggerServerEvent('police:server:CuffPlayer', "back", GetPlayerServerId(player), item)
+                    loadAnimDict("mp_arresting")
+                    CuffAnim("mp_arresting", "a_uncuff")
+
+                end
+        else
+            QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
+        end
+    else
+        Wait(2000)
+    end
+end)
+
+RegisterNetEvent('police:client:GetCuffed', function(source, position, item)
+    local ped = PlayerPedId()
+    if not isHandcuffed then
+
+        isHandcuffed = true
+        TriggerServerEvent("police:server:SetHandcuffStatus", true, item, position)
+        ClearPedTasksImmediately(ped)
+        if GetSelectedPedWeapon(ped) ~= `WEAPON_UNARMED` then SetCurrentPedWeapon(ped, `WEAPON_UNARMED`, true) end
+        local prop = "p_cs_cuffs_02_s"
+
+        animName = "idle"
+        animDict = "mp_arresting"
+        loadAnimDict(animDict)
+        Wait(1500)
+        LoadCuffModel(prop)
+        CreateHandCuff(prop, PlayerPedId())
+        AttachEntityToEntity(cuffitem, GetPlayerPed(PlayerId()), GetPedBoneIndex(GetPlayerPed(PlayerId()), 60309), -0.055, 0.06, 0.04, 265.0, 155.0, 80.0, true, false, false, false, 0, true)
+    end
+end)
+
+
+RegisterNetEvent('jaga-gangmenu:client:cuffPlayer')
+AddEventHandler('jaga-gangmenu:client:cuffPlayer', function(playerPed)
+
+    while not HasAnimDictLoaded("mp_arresting") do
+        Citizen.Wait(100)
+    end
+
+    TaskPlayAnim(lPed, "mp_arresting", "idle", 8.0, -8, -1, 49, 0, 0, 0, 0)
+
+	player.disableControls()
+
 end)
 
 RegisterNetEvent('jaga-gangmenu:fouilleren')
@@ -227,6 +256,11 @@ AddEventHandler('jaga-gangmenu:fouilleren', function()
         end
     end
 end)
+
+
+-- -=-=-=-=-=-=-
+-- VOERTUIG
+-- -=-=-=-=-=-=-
 
 
 RegisterNetEvent('jaga-gangmenu:inVoertuigSteken')
@@ -393,7 +427,6 @@ end)
 
 
 
-
 -- -=-=-=-=-=-=-
 --    LOOPS
 -- -=-=-=-=-=-=-
@@ -460,6 +493,56 @@ Citizen.CreateThread(function()
 end)
 
 
+--function disableControls()
+--	CreateThread(function()
+--		while player.cuffed do
+--			DisableControlAction(0, 140, true)
+--			DisableControlAction(0, 69, true)
+--			DisableControlAction(0, 92, true)
+--			DisableControlAction(0, 114, true)
+--			DisableControlAction(0, 56, true)
+--
+--			DisableControlAction(0, 24, true) -- Attack
+--			DisableControlAction(0, 25, true) -- Aim
+--			DisableControlAction(0, 263, true) -- Melee Attack 1
+--
+--			DisableControlAction(0, 45, true) -- Reload
+--			DisableControlAction(0, 22, true) -- Jump
+--			DisableControlAction(0, 44, true) -- Cover
+--			DisableControlAction(0, 37, true) -- Select Weapon
+--			DisableControlAction(0, 23, true) -- Also 'enter'?
+--
+--			DisableControlAction(0, 288, true) -- Disable phone
+--			DisableControlAction(0, 289, true) -- Inventory
+--			DisableControlAction(0, 170, true) -- Animations
+--			DisableControlAction(0, 167, true) -- Job
+--
+--			DisableControlAction(0, 0, true) -- Disable changing view
+--			DisableControlAction(0, 26, true) -- Disable looking behind
+--			DisableControlAction(0, 73, true) -- Disable clearing animation
+--			DisableControlAction(2, 199, true) -- Disable pause screen
+--
+--			DisableControlAction(0, 59, true) -- Disable steering in vehicle
+--			DisableControlAction(0, 71, true) -- Disable driving forward in vehicle
+--			DisableControlAction(0, 72, true) -- Disable reversing in vehicle
+--
+--			DisableControlAction(2, 36, true) -- Disable going stealth
+--
+--			DisableControlAction(0, 47, true) -- Disable weapon
+--			DisableControlAction(0, 264, true) -- Disable melee
+--			DisableControlAction(0, 257, true) -- Disable melee
+--			DisableControlAction(0, 140, true) -- Disable melee
+--			DisableControlAction(0, 141, true) -- Disable melee
+--			DisableControlAction(0, 142, true) -- Disable melee
+--			DisableControlAction(0, 143, true) -- Disable melee
+--			DisableControlAction(0, 75, true) -- Disable exit vehicle
+--			DisableControlAction(27, 75, true) -- Disable exit vehicle
+--			Wait(0)
+--		end
+--	end)
+--end
+
+
 -- Show a help message (top left corner).
 -- This is a simplefied version. Input text length is limited.
 function ShowHelp(text, bleep)
@@ -501,7 +584,7 @@ lib.registerMenu({
     --fouilleren
     elseif selected == 2 then 
         print("frisk event")
-        TriggerEvent('jaga-gangmenu:fouilleren')
+        TriggerEvent('police:client:SearchPlayer')
     --in auto steken
     elseif selected == 3 then 
         print("car in event")
