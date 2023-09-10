@@ -38,7 +38,7 @@ local reparerenDur = Config.repareren_dur
         local distance = #(playerCoords - GetEntityCoords(vehicle))
         local height = GetEntityHeightAboveGround(vehicle)
 
-        if distance <= smallestDistance and height <= maxHeight and height >= 0 and not IsPedInVehicle(ped, vehicle, false) then
+        if distance <= smallestDistance and height <= maxHeight and height >= 0 then
             smallestDistance = distance
             veh = vehicle
         end
@@ -151,61 +151,23 @@ AddEventHandler('jaga-gangmenu:cuff', function()
             if targetPed then
                 print("targetped " ..targetPed)
                 
+                if facing then
 
-                TriggerServerEvent('jaga-gangmenu:server:cuffPlayer', ped, targetPed)
-                    
+                    TriggerServerEvent('jaga:server:CuffPlayer', "back", GetPlayerServerId(player))
+                    --TriggerServerEvent('jaga-gangmenu:server:cuffPlayer', ped, targetPed)
+
+                    loadAnimDict("mp_arresting")
+                    CuffAnim("mp_arresting", "a_uncuff")
+                    loadAnimDict("mp_arresting")
+                    TaskPlayAnim(PlayerPedId(), "mp_arresting", "a_uncuff", 8.0, -8, -1, 49, 0, false, false, false)
+                    Wait(2000)
+                    ClearPedTasks(PlayerPedId())
+
+                end  
             else 
                 print("no player near you!")
             end
         end
-    end
-end)
-
-local function CuffAnim(dict, anim)
-    loadAnimDict(dict)
-    TaskPlayAnim(PlayerPedId(), dict, anim, 8.0, -8, -1, 49, 0, false, false, false)
-    Wait(2000)
-    ClearPedTasks(PlayerPedId())
-end
-
-RegisterNetEvent('police:client:CuffPlayer', function(item)
-    if not IsPedRagdoll(PlayerPedId()) then
-        local player, distance = QBCore.Functions.GetClosestPlayer()
-        if player ~= -1 and distance <= 2.5 then
-            TaskTurnPedToFaceEntity(PlayerPedId(), GetPlayerPed(player),1000)
-                local facing = IsPedFacingPed(GetPlayerPed(player), PlayerPedId(),60.0)
-                if facing then
-
-                    TriggerServerEvent('police:server:CuffPlayer', "back", GetPlayerServerId(player), item)
-                    loadAnimDict("mp_arresting")
-                    CuffAnim("mp_arresting", "a_uncuff")
-
-                end
-        else
-            QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
-        end
-    else
-        Wait(2000)
-    end
-end)
-
-RegisterNetEvent('police:client:GetCuffed', function(source, position, item)
-    local ped = PlayerPedId()
-    if not isHandcuffed then
-
-        isHandcuffed = true
-        TriggerServerEvent("police:server:SetHandcuffStatus", true, item, position)
-        ClearPedTasksImmediately(ped)
-        if GetSelectedPedWeapon(ped) ~= `WEAPON_UNARMED` then SetCurrentPedWeapon(ped, `WEAPON_UNARMED`, true) end
-        local prop = "p_cs_cuffs_02_s"
-
-        animName = "idle"
-        animDict = "mp_arresting"
-        loadAnimDict(animDict)
-        Wait(1500)
-        LoadCuffModel(prop)
-        CreateHandCuff(prop, PlayerPedId())
-        AttachEntityToEntity(cuffitem, GetPlayerPed(PlayerId()), GetPedBoneIndex(GetPlayerPed(PlayerId()), 60309), -0.055, 0.06, 0.04, 265.0, 155.0, 80.0, true, false, false, false, 0, true)
     end
 end)
 
@@ -297,13 +259,11 @@ AddEventHandler('jaga-gangmenu:inVoertuigSteken', function()
                         end
                     end
 
-
                     local myPed = PlayerPedId()
                     local newIgnoreList = {myPed}
 
                     local coords = GetEntityCoords(myPed)
-                    --local closestPlayer, distance = QBCore.Functions.GetClosestPed(coords, newIgnoreList)
-                    --local closestPlayerId, closestPlayer, closestPlayerCoords = lib.getClosestPlayer(coords, 4, false)
+
                     
                     local targetPlayerId, distance = QBCore.Functions.GetClosestPlayer()
                     local targetId = -10 -- -10 omdat een id nooit -10 kan zijn, en zo kunnen we zien of er iemand gevonden is in de buurt
@@ -313,10 +273,11 @@ AddEventHandler('jaga-gangmenu:inVoertuigSteken', function()
                         print(GetPlayerServerId(targetPlayerId))
                     end
 
-                    --print("Player ID: " .. targetId .. ", ped: " .. GetPlayerPed(targetId) .. " My ped: "..PlayerPedId().. " veh: " ..veh) -- Add this line for debugging
+                    print("Player ID: " .. targetId .. ", ped: " .. GetPlayerPed(targetId) .. " My ped: "..PlayerPedId().. " veh: " ..veh) -- Add this line for debugging
 
 
                     if targetId ~= -10 then
+                        print("in auto server event")
                         TriggerServerEvent('jaga-gangmenu:server:PutPlayerInVehicle', targetId, veh, seatToPutIn)
                         --TaskWarpPedIntoVehicle(PlayerPedId(), veh, seatToPutIn+1)
                     else 
@@ -332,6 +293,7 @@ end)
 RegisterNetEvent('jaga-gangmenu:client:inVoertuigGestoken')
 AddEventHandler('jaga-gangmenu:client:inVoertuigGestoken', function(veh, seat)
 
+    print("debug message inVoertuigGestoken" .. " " .. seat)
     TaskWarpPedIntoVehicle(PlayerPedId(), veh, seat)
 
 end)
@@ -340,6 +302,7 @@ end)
 RegisterNetEvent('jaga-gangmenu:uitVoertuigHalen')
 AddEventHandler('jaga-gangmenu:uitVoertuigHalen', function()
     --get the player
+    print("ran")
     local player = QBCore.Functions.GetPlayerData()
     if player.job ~= nil and player.job.name ~= nil then
         local jobName = player.job.name
@@ -358,14 +321,17 @@ AddEventHandler('jaga-gangmenu:uitVoertuigHalen', function()
                 local targetId = -10
                 --targetId = GetPlayerServerId(PlayerId()) --REMOVE AFTER TESTING
                 if targetPlayerId ~= -1 and distance < 3 then
-                    targetId = GetPlayerServerId(targetPlayerId)
-                    print(GetPlayerServerId(targetPlayerId))
+                    if IsPedInVehicle(GetPlayerPed(targetPlayerId), veh) then
+                        targetId = GetPlayerServerId(targetPlayerId)
+                        print(GetPlayerServerId(targetPlayerId))
+                    end
                 end
 
-                --print("Player ID: " .. targetId .. ", ped: " .. GetPlayerPed(targetId) .. " My ped: "..PlayerPedId().. " veh: " ..veh) -- Add this line for debugging
+                print("Player ID: " .. targetId .. ", ped: " .. GetPlayerPed(targetId) .. " My ped: "..PlayerPedId().. " veh: " ..veh) -- Add this line for debugging
 
 
                 if targetId ~= -10 then
+                    print("sent2")
                     TriggerServerEvent('jaga-gangmenu:server:TakePlayerOutOfVehicle', targetId, veh)
                     --TaskWarpPedIntoVehicle(PlayerPedId(), veh, seatToPutIn+1)
                 else 
@@ -591,10 +557,10 @@ lib.registerMenu({
         TriggerEvent('jaga-gangmenu:inVoertuigSteken')
     -- uit auto halen
     elseif selected == 4 then 
-        TriggerEvent('jaga-gangmenu:uitVoertuigHalen', scrollIndex)
+        TriggerEvent('jaga-gangmenu:uitVoertuigHalen')
     -- mee slepen
     elseif selected == 5 then 
-        TriggerEvent('jaga-gangmenu:kleedkamer', scrollIndex)
+        TriggerEvent('jaga-gangmenu:kleedkamer')
     end
 end)
  
