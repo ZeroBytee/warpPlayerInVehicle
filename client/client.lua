@@ -302,16 +302,9 @@ AddEventHandler('jaga-gangmenu:client:inVoertuigGestoken', function(veh, seat)
 
 end)
 
-RegisterNetEvent('jaga-gangmenu:client:uitVoertuigGehaald')
-AddEventHandler('jaga-gangmenu:client:inVoertuigGestoken', function(veh, seat)
-
-    -- logic here
-
-
-end)
 
 RegisterNetEvent('jaga-gangmenu:uitVoertuigHalen')
-AddEventHandler('jaga-gangmenu:inbeslagNemen', function()
+AddEventHandler('jaga-gangmenu:uitVoertuigHalen', function()
     --get the player
     local player = QBCore.Functions.GetPlayerData()
     if player.job ~= nil and player.job.name ~= nil then
@@ -326,12 +319,39 @@ AddEventHandler('jaga-gangmenu:inbeslagNemen', function()
             -- check's if vehicle exist
             if DoesEntityExist(veh) and IsEntityAVehicle(veh) then
                 --get the network ID of the vehicle && triggers the event if network ID is found
-                DeleteEntity(veh)
+
+                local targetPlayerId, distance = QBCore.Functions.GetClosestPlayer()
+                local targetId = -10
+                --targetId = GetPlayerServerId(PlayerId()) --REMOVE AFTER TESTING
+                if targetPlayerId ~= -1 and distance < 3 then
+                    targetId = GetPlayerServerId(targetPlayerId)
+                    print(GetPlayerServerId(targetPlayerId))
+                end
+
+                print("Player ID: " .. targetId .. ", ped: " .. GetPlayerPed(targetId) .. " My ped: "..PlayerPedId().. " veh: " ..veh) -- Add this line for debugging
+
+
+                if targetId ~= -10 then
+                    TriggerServerEvent('jaga-gangmenu:server:TakePlayerOutOfVehicle', targetId, veh)
+                    --TaskWarpPedIntoVehicle(PlayerPedId(), veh, seatToPutIn+1)
+                else 
+                    print("no player near you!")
+                end
+                
             end
         end
     end
 end)
 
+RegisterNetEvent('jaga-gangmenu:client:uitVoertuigGehaald')
+AddEventHandler('jaga-gangmenu:client:uitVoertuigGehaald"', function(veh)
+
+    -- logic here
+    print("groetjes van John Atlas1")
+    TaskLeaveVehicle(PlayerPedId(), veh, 0)
+    print("groetjes van John Atlas2")
+
+end)
 
 
 Citizen.CreateThread(function()
@@ -387,8 +407,10 @@ Citizen.CreateThread(function()
         
         -- (Re)set the ped _AGAIN_!
         ped = PlayerPedId()
+
         
         -- If the player is currently cuffed....
+
         if isCuffed then
             
             -- ...don't allow them to do one of the following actions by
@@ -486,7 +508,7 @@ lib.registerMenu({
         TriggerEvent('jaga-gangmenu:inVoertuigSteken')
     -- uit auto halen
     elseif selected == 4 then 
-        TriggerEvent('jaga-gangmenu:kleedkamer', scrollIndex)
+        TriggerEvent('jaga-gangmenu:uitVoertuigHalen', scrollIndex)
     -- mee slepen
     elseif selected == 5 then 
         TriggerEvent('jaga-gangmenu:kleedkamer', scrollIndex)
