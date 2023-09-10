@@ -95,13 +95,11 @@ RegisterNetEvent('jaga-gangmenu:server:TakePlayerOutOfVehicle', function(playerI
     local targetPed = GetPlayerPed(playerId)
     local playerCoords = GetEntityCoords(playerPed)
     local targetCoords = GetEntityCoords(targetPed)
-    --if #(playerCoords - targetCoords) > 2.5 then return DropPlayer(src, "Attempted exploit abuse") end
+    if #(playerCoords - targetCoords) > 2.5 then return DropPlayer(src, "Attempted exploit abuse") end
 
     --local EscortPlayer = QBCore.Functions.GetPlayer(playerId)
-    --if not QBCore.Functions.GetPlayer(src) or not EscortPlayer then return end
-    print(playerId, veh)
+    if not QBCore.Functions.GetPlayer(src) then return end
     TriggerClientEvent("jaga-gangmenu:client:uitVoertuigGehaald", playerId, veh)
-    print("sent")
     
     --TaskWarpPedIntoVehicle(playerPed, veh, -1)
 end)

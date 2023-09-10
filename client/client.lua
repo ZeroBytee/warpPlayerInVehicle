@@ -279,7 +279,7 @@ AddEventHandler('jaga-gangmenu:inVoertuigSteken', function()
                         print(GetPlayerServerId(targetPlayerId))
                     end
 
-                    print("Player ID: " .. targetId .. ", ped: " .. GetPlayerPed(targetId) .. " My ped: "..PlayerPedId().. " veh: " ..veh) -- Add this line for debugging
+                    --print("Player ID: " .. targetId .. ", ped: " .. GetPlayerPed(targetId) .. " My ped: "..PlayerPedId().. " veh: " ..veh) -- Add this line for debugging
 
 
                     if targetId ~= -10 then
@@ -328,7 +328,7 @@ AddEventHandler('jaga-gangmenu:uitVoertuigHalen', function()
                     print(GetPlayerServerId(targetPlayerId))
                 end
 
-                print("Player ID: " .. targetId .. ", ped: " .. GetPlayerPed(targetId) .. " My ped: "..PlayerPedId().. " veh: " ..veh) -- Add this line for debugging
+                --print("Player ID: " .. targetId .. ", ped: " .. GetPlayerPed(targetId) .. " My ped: "..PlayerPedId().. " veh: " ..veh) -- Add this line for debugging
 
 
                 if targetId ~= -10 then
@@ -344,11 +344,11 @@ AddEventHandler('jaga-gangmenu:uitVoertuigHalen', function()
 end)
 
 RegisterNetEvent('jaga-gangmenu:client:uitVoertuigGehaald')
-AddEventHandler('jaga-gangmenu:client:uitVoertuigGehaald"', function(veh)
+AddEventHandler('jaga-gangmenu:client:uitVoertuigGehaald', function(veh)
 
     -- logic here
     print("groetjes van John Atlas1")
-    TaskLeaveVehicle(PlayerPedId(), veh, 0)
+    TaskLeaveVehicle(PlayerPedId(), veh, 16)
     print("groetjes van John Atlas2")
 
 end)
@@ -484,7 +484,7 @@ lib.registerMenu({
     
     options = {
         {label = 'Boei', description = Config.handboeien_desc, icon = 'handcuffs'},
-        {label = 'Fouilleren', description = Config.schoonmaken_desc, icon = 'hand-wave'},
+        {label = 'Fouilleren', description = Config.schoonmaken_desc, icon = 'eye'},
         {label = 'In auto steken', description = Config.inbeslagNemen_desc, icon = 'right-to-bracket'},
         {label = 'Uit auto halen', description = Config.inbeslagNemen_desc, icon = 'circle-xmark'},
         {label = 'Mee slepen', description = Config.inbeslagNemen_desc, icon = 'person-military-pointing'},
