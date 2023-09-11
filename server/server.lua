@@ -1,18 +1,6 @@
 -- maak een lijst die dat alle gecuffde spelers bijhoud
 local QBCore = exports['qb-core']:GetCoreObject()
 
-local playerCuffStatus = {}
-
-lib.callback.register('jaga-gangmenu:isPlayerCuffed', function(target)
-    return playerCuffStatus[target] or false
-end)
-
-
-
-local function IsPlayerCuffed(playerPedId)
-    return playerCuffStatus[playerPedId] or false
-end
-
 
 RegisterNetEvent('jaga-gangmenu:server:PutPlayerInVehicle', function(playerId, veh, freeSeat)
     local src = source
